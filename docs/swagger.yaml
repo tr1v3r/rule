@@ -1,0 +1,38 @@
+basePath: /api/v1
+externalDocs:
+  description: OpenAPI
+  url: https://swagger.io/resources/open-api/
+host: localhost:8080
+info:
+  contact:
+    email: churiver@outlook.com
+    name: R1v3r
+    url: http://localhost/support
+  description: This is a rule engine server.
+  license:
+    name: MIT License
+    url: https://www.mit.edu/~amini/LICENSE.md
+  termsOfService: http://localhost/terms/
+  title: R1v3r's rule engine
+  version: "1.0"
+paths:
+  /ping:
+    get:
+      consumes:
+      - text/plain
+      description: return pong
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Check status
+      tags:
+      - status
+securityDefinitions:
+  BasicAuth:
+    type: basic
+swagger: "2.0"
