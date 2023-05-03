@@ -10,7 +10,13 @@ var _ Driver = &DummyDriver{}
 
 type DummyDriver struct{}
 
-func (d *DummyDriver) GetLevel(path string) int { return len(strings.Split(path, "/")) - 1 }
+func (DummyDriver) Type() string { return "dummy" }
+func (d *DummyDriver) GetLevel(path string) int {
+	if path = strings.TrimSpace(path); path != "/" && path != "" {
+		return len(strings.Split(path, "/")) - 1
+	}
+	return 0
+}
 func (d *DummyDriver) GetNameByLevel(path string, level int) string {
 	return strings.Split(path, "/")[level]
 }
@@ -22,12 +28,16 @@ func TestBuildTree(t *testing.T) {
 	var rules = []*Rule{
 		{Path: "/a/b/c/d"},
 		{Path: "/a/b/c"},
-		{Path: ""},
+		{Path: "/"},
 		{Path: "/x/y/z"},
 		{Path: "/a/b/m"},
 	}
 
-	tree := BuildTree("unit_test", "dummy", &DummyDriver{}, rules...)
+	tree, err := BuildTree("unit_test", &DummyDriver{}, rules...)
+	if err != nil {
+		t.Errorf("build tree fail: %s", err)
+		return
+	}
 
 	result, _ := json.MarshalIndent(tree.ShowStruct(), "", "\t")
 	t.Logf("tree: %s", result)

@@ -6,29 +6,29 @@ import (
 	"sync"
 )
 
-func BuildJSONTree(name string, rules ...*Rule) *Tree {
-	return BuildTree(name, "json", &JSONDriver{}, rules...)
+// BuildJSONTree ...
+func BuildJSONTree(name string, rules ...*Rule) (*Tree, error) {
+	return BuildTree(name, &JSONDriver{}, rules...)
 }
 
 // BuildTree build a rule tree.
-func BuildTree(name, typ string, diver Driver, rules ...*Rule) *Tree {
+func BuildTree(name string, diver Driver, rules ...*Rule) (*Tree, error) {
 	tree := &Tree{
-		Name: name,
-		Type: typ,
-
+		Name:     name,
 		driver:   diver,
 		children: make(map[string]*Tree),
 	}
 	for _, r := range tree.sortRule(rules) {
-		tree.AddRule(r)
+		if err := tree.AddRule(r); err != nil {
+			return nil, fmt.Errorf("add rule error: %w", err)
+		}
 	}
-	return tree
+	return tree, nil
 }
 
 // Tree is a rule tree structure.
 type Tree struct {
 	Name string // node name
-	Type string // json/yaml/xml
 
 	ops []string
 
@@ -146,7 +146,6 @@ func (t *Tree) graft(subTree *Tree) *Tree {
 func (t *Tree) newSubTree(name string) *Tree {
 	return &Tree{
 		Name: name,
-		Type: t.Type,
 
 		driver: t.driver,
 
