@@ -7,6 +7,9 @@ type Forest struct {
 }
 
 type Driver interface {
+	// Type return driver type
+	Type() string // json/yaml/xml
+
 	// GetLevel get level from path
 	GetLevel(path string) (level int)
 
