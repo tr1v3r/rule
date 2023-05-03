@@ -4,17 +4,21 @@ import (
 	"encoding/json"
 	"fmt"
 	"sync"
+
+	"github.com/riverchu/rule/biz/service/driver"
 )
 
 // BuildJSONTree ...
-func BuildJSONTree(name string, rules ...*Rule) (*Tree, error) {
-	return BuildTree(name, &JSONDriver{}, rules...)
+func BuildJSONTree(name, template string, rules ...*Rule) (*Tree, error) {
+	return BuildTree(name, template, &driver.JSONDriver{}, rules...)
 }
 
 // BuildTree build a rule tree.
-func BuildTree(name string, diver Driver, rules ...*Rule) (*Tree, error) {
+func BuildTree(name, template string, diver driver.Driver, rules ...*Rule) (*Tree, error) {
 	tree := &Tree{
-		Name:     name,
+		Name: name,
+
+		rule:     template,
 		driver:   diver,
 		children: make(map[string]*Tree),
 	}
@@ -30,24 +34,23 @@ func BuildTree(name string, diver Driver, rules ...*Rule) (*Tree, error) {
 type Tree struct {
 	Name string // node name
 
-	ops []string
-
-	driver Driver
-	level  int
-
 	mu       sync.RWMutex
 	children map[string]*Tree
 
 	// current node rule
 	ruleMu sync.RWMutex
 	rule   string
+	ops    []driver.Operator
+
+	driver driver.Driver
+	level  int
 }
 
 // AddRule add a rule node to tree or update rule node.
 // make rule tree grow
 func (t *Tree) AddRule(r *Rule) error {
 	if level := t.driver.GetLevel(r.Path); t.level == level { // check if level matched, include root node
-		return t.updateRule(r)
+		return t.updateRule(r.Operators...)
 	}
 	return t.getChild(t.driver.GetNameByLevel(r.Path, t.level+1)).AddRule(r)
 }
@@ -94,6 +97,9 @@ func (t *Tree) ShowStruct() json.RawMessage {
 	d, _ := json.Marshal(m)
 	return d
 }
+
+// GetOperators get all Operators.
+func (t *Tree) GetOperators() []driver.Operator { return t.ops }
 
 // deleteNode delete a node from tree.
 func (t *Tree) deleteNode(name string) error {
@@ -155,9 +161,9 @@ func (t *Tree) newSubTree(name string) *Tree {
 	}
 }
 
-// updateRule parse raw rule operate to tree node.
-func (t *Tree) updateRule(r *Rule) error {
-	rule, err := t.driver.CalcRule(t.getRule(), r)
+// updateRule parse raw rule Operator to tree node.
+func (t *Tree) updateRule(ops ...driver.Operator) error {
+	rule, err := t.driver.CalcRule(t.getRule(), ops...)
 	if err != nil {
 		return fmt.Errorf("calculate rule fail: %w", err)
 	}
@@ -165,10 +171,12 @@ func (t *Tree) updateRule(r *Rule) error {
 	t.ruleMu.Lock()
 	defer t.ruleMu.Unlock()
 	t.rule = rule
+	t.ops = append(t.ops, ops...)
 
 	return nil
 }
 
+// getRule return current node rule.
 func (t *Tree) getRule() string {
 	t.ruleMu.RLock()
 	defer t.ruleMu.RUnlock()
