@@ -6,12 +6,13 @@ import "time"
 type Driver interface {
 	Name() string
 
-	PathDriver
-	RuleDriver
-	OperatorDriver
+	PathParser
+	Calculator
+	Modem
 }
 
-type PathDriver interface {
+// PathParser path parser
+type PathParser interface {
 	// GetLevel get level from path
 	GetLevel(path string) (level int)
 	// GetNameByLevel get node name from path by level
@@ -19,12 +20,14 @@ type PathDriver interface {
 	GetNameByLevel(path string, level int) (name string)
 }
 
-type RuleDriver interface {
+// Calculator rule calculator
+type Calculator interface {
 	// CalcRule calc rule
 	CalcRule(template string, ops ...Operator) (string, error)
 }
 
-type OperatorDriver interface {
+// Modem operators modem
+type Modem interface {
 	// OperatorsForSave get operators data for save
 	Marshal(...Operator) []byte
 
