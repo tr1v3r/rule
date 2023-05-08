@@ -18,11 +18,11 @@ func TestBuildTree(t *testing.T) {
 	}
 
 	tree, err := rule.BuildTree("unit_test", "{}", &struct {
-		driver.SlashPathDriver
-		driver.CommonRuleDriver
-		driver.DummyOperatorDriver
+		driver.PathParser
+		driver.StdCalculator
+		driver.DummyOperatorModem
 		driver.DummyDriver // just provide a method Name
-	}{}, rules...)
+	}{PathParser: driver.SlashPathParser}, rules...)
 	if err != nil {
 		t.Errorf("build tree fail: %s", err)
 		return

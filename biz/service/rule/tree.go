@@ -10,7 +10,12 @@ import (
 
 // BuildJSONTree ...
 func BuildJSONTree(name, template string, rules ...*Rule) (*Tree, error) {
-	return BuildTree(name, template, &driver.JSONDriver{}, rules...)
+	return BuildTree(name, template, driver.NewJSONDriver(), rules...)
+}
+
+// BuildYAMLTree ...
+func BuildYAMLTree(name, template string, rules ...*Rule) (*Tree, error) {
+	return BuildTree(name, template, driver.NewYAMLDriver(), rules...)
 }
 
 // BuildTree build a rule tree.
@@ -185,6 +190,6 @@ func (t *Tree) getRule() string {
 
 // sortRule sort rules by path.
 func (t *Tree) sortRule(rules []*Rule) []*Rule {
-	By(func(x, y *Rule) bool { return t.driver.GetLevel(x.Path) < t.driver.GetLevel(y.Path) }).Sort(rules)
+	by(func(x, y *Rule) bool { return t.driver.GetLevel(x.Path) < t.driver.GetLevel(y.Path) }).Sort(rules)
 	return rules
 }
