@@ -6,18 +6,26 @@ import (
 
 // var _ Driver = (*DummyDriver)(nil)
 
+func NewDummyDriver() *DummyDriver {
+	return &DummyDriver{
+		PathParser: new(DelimiterPathParser).WithDelimiter("/"),
+		Calculator: new(StdCalculator),
+		Modem:      new(DummyOperatorModem),
+	}
+}
+
 type DummyDriver struct {
-	SlashPathDriver
-	CommonRuleDriver
-	DummyOperatorDriver
+	PathParser
+	Calculator
+	Modem
 }
 
 func (DummyDriver) Name() string { return "dummy" }
 
-type DummyOperatorDriver struct{}
+type DummyOperatorModem struct{}
 
-func (d *DummyOperatorDriver) Marshal(ops ...Operator) []byte            { return nil }
-func (d *DummyOperatorDriver) Unmarshal(data []byte) ([]Operator, error) { return nil, nil }
+func (d *DummyOperatorModem) Marshal(ops ...Operator) []byte            { return nil }
+func (d *DummyOperatorModem) Unmarshal(data []byte) ([]Operator, error) { return nil, nil }
 
 var _ Operator = (*DummyOperator)(nil)
 
