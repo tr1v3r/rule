@@ -2,7 +2,7 @@ package rule
 
 import "sync"
 
-// Forest rule forest
+// Forest rules forest
 type Forest struct {
 	mu sync.RWMutex
 	m  map[string]*Tree

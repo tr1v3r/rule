@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/riverchu/rule/biz/service/driver"
-	"github.com/riverchu/rule/biz/service/rule"
+	"github.com/riverchu/rule"
+	"github.com/riverchu/rule/driver"
 )
 
 func TestBuildTree(t *testing.T) {

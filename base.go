@@ -3,7 +3,7 @@ package rule
 import (
 	"sort"
 
-	"github.com/riverchu/rule/biz/service/driver"
+	"github.com/riverchu/rule/driver"
 )
 
 // Rule raw rule
