@@ -2,15 +2,23 @@ package rule
 
 import "sync"
 
+// TreeBuilder tree build method
+type TreeBuilder func() (name string, tree *Tree)
+
 // Forest rules forest
 type Forest struct {
 	mu sync.RWMutex
 	m  map[string]*Tree
 
-	builders []func() (name string, tree *Tree)
+	builders []TreeBuilder
 }
 
-// Build
+// Register register tree builder
+func (f *Forest) Register(builder TreeBuilder) {
+	f.builders = append(f.builders, builder)
+}
+
+// Build all trees in forest
 func (f *Forest) Build() {
 	for _, builder := range f.builders {
 		f.Set(builder())
