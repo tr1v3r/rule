@@ -14,6 +14,7 @@ func NewDummyDriver() *DummyDriver {
 	}
 }
 
+// DummyDriver return a dummy driver
 type DummyDriver struct {
 	PathParser
 	Calculator

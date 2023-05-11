@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/riverchu/rule/biz/service/driver"
+	"github.com/riverchu/rule/driver"
 )
 
 // BuildJSONTree ...
