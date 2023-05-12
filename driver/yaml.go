@@ -32,10 +32,10 @@ var _ Operator = (*YAMLOperator)(nil)
 type YAMLOperator struct{}
 
 func (op *YAMLOperator) Type() string                                    { return "" }
+func (op *YAMLOperator) Path() string                                    { return "" }
 func (op *YAMLOperator) Operate(before string) (after string, err error) { return "", nil }
 func (op *YAMLOperator) Author() string                                  { return "" }
 func (op *YAMLOperator) CreatedAt() time.Time                            { return time.Now() }
-func (op *YAMLOperator) Path() string                                    { return "" }
 func (op *YAMLOperator) Load([]byte) error                               { return nil }
 func (op *YAMLOperator) Save() []byte                                    { return nil }
 
@@ -44,13 +44,12 @@ var _ Modem = (*YAMLOperatorModem)(nil)
 // YAMLOperatorModem operator driver for yaml
 type YAMLOperatorModem struct{}
 
-func (d *YAMLOperatorModem) Marshal(ops ...Operator) []byte {
+func (d *YAMLOperatorModem) Marshal(ops ...Operator) ([]byte, error) {
 	var buf = make([][]byte, 0, len(ops))
 	for _, op := range ops {
 		buf = append(buf, op.Save())
 	}
-	data, _ := yaml.Marshal(buf)
-	return data
+	return yaml.Marshal(buf)
 }
 func (d *YAMLOperatorModem) Unmarshal(data []byte) ([]Operator, error) {
 	var buf = make([][]byte, 0, 8)

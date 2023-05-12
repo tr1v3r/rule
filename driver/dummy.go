@@ -6,6 +6,7 @@ import (
 
 // var _ Driver = (*DummyDriver)(nil)
 
+// NewDummyDriver ...
 func NewDummyDriver() *DummyDriver {
 	return &DummyDriver{
 		PathParser: new(DelimiterPathParser).WithDelimiter("/"),
@@ -25,17 +26,17 @@ func (DummyDriver) Name() string { return "dummy" }
 
 type DummyOperatorModem struct{}
 
-func (d *DummyOperatorModem) Marshal(ops ...Operator) []byte            { return nil }
+func (d *DummyOperatorModem) Marshal(ops ...Operator) ([]byte, error)   { return nil, nil }
 func (d *DummyOperatorModem) Unmarshal(data []byte) ([]Operator, error) { return nil, nil }
 
 var _ Operator = (*DummyOperator)(nil)
 
 type DummyOperator struct{}
 
-func (op *DummyOperator) Type() string                                    { return "" }
-func (op *DummyOperator) Operate(before string) (after string, err error) { return "", nil }
-func (op *DummyOperator) Author() string                                  { return "" }
-func (op *DummyOperator) CreatedAt() time.Time                            { return time.Now() }
+func (op *DummyOperator) Type() string                                    { return "dummy" }
 func (op *DummyOperator) Path() string                                    { return "" }
+func (op *DummyOperator) Operate(before string) (after string, err error) { return "", nil }
+func (op *DummyOperator) Author() string                                  { return "dummy" }
+func (op *DummyOperator) CreatedAt() time.Time                            { return time.Now() }
 func (op *DummyOperator) Load([]byte) error                               { return nil }
 func (op *DummyOperator) Save() []byte                                    { return nil }

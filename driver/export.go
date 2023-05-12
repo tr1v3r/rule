@@ -29,7 +29,7 @@ type Calculator interface {
 // Modem operators modem
 type Modem interface {
 	// OperatorsForSave get operators data for save
-	Marshal(...Operator) []byte
+	Marshal(...Operator) ([]byte, error)
 
 	// LoadOperators load operators from data
 	Unmarshal(data []byte) ([]Operator, error)
@@ -37,14 +37,17 @@ type Modem interface {
 
 // Operator rule operator
 type Operator interface {
+	// Path return target tree path, not necessary
+	Path() string
+
+	// Type return operator type
 	Type() string
+	// Operate do operate rule
 	Operate(before string) (after string, err error)
 
 	// informatin
 	Author() string
 	CreatedAt() time.Time
-	// Path return operate path, not necessary
-	Path() string
 
 	// Load load operator from data
 	Load([]byte) error

@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"testing"
+
+	"github.com/riverchu/rule/driver"
 )
 
 func TestDriver_Marshal(t *testing.T) {
@@ -21,4 +23,38 @@ func TestDriver_Marshal(t *testing.T) {
 	for _, v := range nextBuf {
 		t.Logf("got result: %s", string(v))
 	}
+}
+
+func TestJSONDriver(t *testing.T) {
+	var rule string
+
+	d := driver.NewJSONDriver()
+
+	data, err := d.Marshal([]driver.Operator{
+		&driver.JSONOperator{T: "create", JSONPath: "name.first", V: "river"},
+		&driver.JSONOperator{T: "create", JSONPath: "name.last", V: "chu"},
+		&driver.JSONOperator{T: "create", JSONPath: "name.last", V: "Chu"},
+		&driver.JSONOperator{T: "append", JSONPath: "dear.friends.-1", V: "tom"},
+		&driver.JSONOperator{T: "append", JSONPath: "dear.friends.-1", V: "ken"},
+		&driver.JSONOperator{T: "set", JSONPath: "dear.family", V: `["mom","dad","bro"]`},
+		&driver.JSONOperator{T: "create", JSONPath: "name.verbose", V: "verbose"},
+		&driver.JSONOperator{T: "delete", JSONPath: "name.verbose"},
+	}...)
+	if err != nil {
+		t.Errorf("marshal fail: %s", err)
+		return
+	}
+	ops, err := d.Unmarshal(data)
+	if err != nil {
+		t.Errorf("unmarshal fail: %s", err)
+		return
+	}
+	for _, op := range ops {
+		rule, err = op.Operate(rule)
+		if err != nil {
+			t.Errorf("operate fail: %s", err)
+			return
+		}
+	}
+	t.Logf("got result: %s", rule)
 }
