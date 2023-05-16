@@ -8,6 +8,34 @@ import (
 	"github.com/riverchu/rule/driver"
 )
 
+func TestSlashPathParser(t *testing.T) {
+	var testcases = []struct {
+		path  string
+		level int
+	}{
+		{"", 0},
+		{"/", 0},
+		{"/a/", 1},
+		{"/a", 1},
+		{"a/", 1},
+		{"a", 1},
+		{"/a/b/", 2},
+		{"a/b/", 2},
+		{"/a/b", 2},
+		{"a/b", 2},
+		{"/a/b/c/", 3},
+		{"a/b/c/", 3},
+		{"/a/b/c", 3},
+		{"a/b/c", 3},
+	}
+
+	for _, item := range testcases {
+		if l := driver.SlashPathParser.GetLevel(item.path); l != item.level {
+			t.Errorf("get level expected %d, got %d", item.level, l)
+		}
+	}
+}
+
 func TestDriver_Marshal(t *testing.T) {
 	var buf = make([]json.RawMessage, 0, 8)
 	for i := range [8]int{} {
