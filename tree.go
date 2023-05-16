@@ -8,18 +8,18 @@ import (
 	"github.com/riverchu/rule/driver"
 )
 
-// BuildJSONTree ...
-func BuildJSONTree(name, template string, rules ...*Rule) (*Tree, error) {
-	return BuildTree(name, template, driver.NewJSONDriver(), rules...)
+// NewJSONTree ...
+func NewJSONTree(name, template string, rules ...*Rule) (*Tree, error) {
+	return NewTree(driver.NewJSONDriver(), name, template, rules...)
 }
 
-// BuildYAMLTree ...
-func BuildYAMLTree(name, template string, rules ...*Rule) (*Tree, error) {
-	return BuildTree(name, template, driver.NewYAMLDriver(), rules...)
+// NewYAMLTree ...
+func NewYAMLTree(name, template string, rules ...*Rule) (*Tree, error) {
+	return NewTree(driver.NewYAMLDriver(), name, template, rules...)
 }
 
-// BuildTree build a rule tree.
-func BuildTree(name, template string, diver driver.Driver, rules ...*Rule) (*Tree, error) {
+// NewTree build a rule tree.
+func NewTree(diver driver.Driver, name, template string, rules ...*Rule) (*Tree, error) {
 	tree := &Tree{
 		Name: name,
 

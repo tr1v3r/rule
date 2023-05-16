@@ -21,13 +21,22 @@ func (d DelimiterPathParser) WithDelimiter(delimiter string) *DelimiterPathParse
 	return &d
 }
 func (d *DelimiterPathParser) GetLevel(path string) int {
-	if path = strings.TrimSpace(path); path != d.delimiter && path != "" {
-		return len(strings.Split(path, d.delimiter)) - 1
+	if path = strings.Trim(strings.TrimSpace(path), d.delimiter); path != "" {
+		return len(strings.Split(path, d.delimiter))
 	}
 	return 0
 }
 func (d *DelimiterPathParser) GetNameByLevel(path string, level int) string {
-	return strings.Split(path, d.delimiter)[level]
+	if path = strings.Trim(strings.TrimSpace(path), d.delimiter); path != "" {
+		return d.getName(strings.Split(path, d.delimiter), level-1)
+	}
+	return ""
+}
+func (d *DelimiterPathParser) getName(paths []string, index int) string {
+	if index >= len(paths) {
+		return ""
+	}
+	return paths[index]
 }
 
 var _ Calculator = (*StdCalculator)(nil)
