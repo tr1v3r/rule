@@ -74,6 +74,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/riverchu/pkg v0.0.15 h1:ZHnH+oFEfApLjRpd4K79l2caPCf5VqiCM0ZlLAji9DU=
 github.com/riverchu/pkg v0.0.15/go.mod h1:qxV4ZYOT56U4k5njGXRvDIKAuQyUTI6hidxTzeqhVpE=
+github.com/riverchu/pkg v0.0.16-0.20230517062954-61b3a8157785 h1:Dx/LNo5kM4N2sN0QihY7nLKwSB0NXXtnfkS0EbaQrFo=
+github.com/riverchu/pkg v0.0.16-0.20230517062954-61b3a8157785/go.mod h1:qxV4ZYOT56U4k5njGXRvDIKAuQyUTI6hidxTzeqhVpE=
 github.com/rogpeppe/go-internal v1.8.0 h1:FCbCCtXNOY3UtUuHUYaghJg4y7Fd14rXifAYUAtL9R8=
 github.com/sirupsen/logrus v1.9.0 h1:trlNQbNUG3OdDrDil03MCb1H2o9nJ1x4/5LYw7byDE0=
 github.com/sirupsen/logrus v1.9.0/go.mod h1:naHLuLoDiP4jHNo9R0sCBMtWGeIprob74mVsIT4qYEQ=
