@@ -1,14 +1,17 @@
 package main
 
 import (
+	"os"
+	"time"
+
 	"github.com/gin-gonic/gin"
 
 	swaggerFiles "github.com/swaggo/files"     // swagger embed files
 	ginSwagger "github.com/swaggo/gin-swagger" // gin-swagger middleware
 
-	"github.com/riverchu/rule/biz/handler"
-	"github.com/riverchu/rule/biz/handler/rule"
+	"github.com/riverchu/rule"
 	_ "github.com/riverchu/rule/docs"
+	"github.com/riverchu/rule/web"
 )
 
 //	@title			R1v3r's rule engine
@@ -31,12 +34,22 @@ import (
 //	@externalDocs.description	OpenAPI
 //	@externalDocs.url			https://swagger.io/resources/open-api/
 
-func register(r *gin.Engine) *gin.Engine {
-	r.GET("ping", handler.Ping)
+var timeout, _ = time.ParseDuration(os.Getenv("SHUTDOWN_TIMEOUT"))
 
+func main() {
+	var rules []*rule.Rule
+	web.InitForest(web.DefaultBuilder(rules...))
+
+	if timeout == 0 {
+		timeout = 3 * time.Second
+	}
+	web.Serve(timeout, register(gin.Default()))
+}
+
+func register(r *gin.Engine) *gin.Engine {
 	apiV1 := r.Group("api/v1")
 	{
-		rule.RegisterApi(apiV1)
+		web.RegisterApi(apiV1)
 	}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

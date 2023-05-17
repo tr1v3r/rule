@@ -32,6 +32,22 @@ paths:
       summary: Check status
       tags:
       - status
+  /rule:
+    get:
+      consumes:
+      - text/plain
+      description: return node's rule
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get rule
+      tags:
+      - rule
 securityDefinitions:
   BasicAuth:
     type: basic
