@@ -16,7 +16,7 @@ func NewJSONDriver() *JSONDriver {
 	return &JSONDriver{
 		PathParser: new(DelimiterPathParser).WithDelimiter("/"),
 		Calculator: new(StdCalculator),
-		Modem:      new(JSONOperatorModem),
+		Modem:      new(JSONModem),
 	}
 }
 
@@ -30,19 +30,19 @@ type JSONDriver struct {
 // Name return driver name
 func (JSONDriver) Name() string { return "json" }
 
-var _ Modem = (*JSONOperatorModem)(nil)
+var _ Modem = (*JSONModem)(nil)
 
-// JSONOperatorModem modem for json operator
-type JSONOperatorModem struct{}
+// JSONModem modem for json operator
+type JSONModem struct{}
 
-func (d *JSONOperatorModem) Marshal(ops ...Operator) ([]byte, error) {
+func (d *JSONModem) Marshal(ops ...Operator) ([]byte, error) {
 	var buf = make([]json.RawMessage, 0, len(ops))
 	for _, op := range ops {
 		buf = append(buf, op.Save())
 	}
 	return json.Marshal(buf)
 }
-func (d *JSONOperatorModem) Unmarshal(data []byte) ([]Operator, error) {
+func (d *JSONModem) Unmarshal(data []byte) ([]Operator, error) {
 	var buf = make([]json.RawMessage, 0, 8)
 	if err := json.Unmarshal(data, &buf); err != nil {
 		return nil, fmt.Errorf("unmarshal fail: %w", err)
@@ -63,7 +63,7 @@ var _ Operator = (*JSONOperator)(nil)
 
 // JSONOperator is a operator for JSON type rule tree
 type JSONOperator struct {
-	// P is the taget path of the operator
+	// P is the target path of the operator
 	P string `json:"path"`
 
 	// T is the type of the operator
