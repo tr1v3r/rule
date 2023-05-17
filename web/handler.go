@@ -31,5 +31,5 @@ func GetRule(c *gin.Context) {
 	path := c.Query("path")
 
 	rule := f.Get(name).GetRule(path)
-	c.JSON(http.StatusOK, rule)
+	c.Data(http.StatusOK, "application/json", []byte(rule))
 }

@@ -46,18 +46,20 @@ func Serve(timeout time.Duration, handler http.Handler) {
 
 }
 
-func InitForest(builders ...rule.TreeBuilder) { f = rule.NewForest(builders...) }
-
-func DefaultBuilder(rules ...*rule.Rule) rule.TreeBuilder {
+func DefaultBuilder(load func() []*rule.Rule) rule.TreeBuilder {
 	return func() (string, *rule.Tree) {
 		tree, err := rule.NewTree(&webDriver{PathParser: driver.SlashPathParser},
-			treeName, `{}`, rules...)
+			treeName, `{}`, load()...)
 		if err != nil {
 			panic(fmt.Errorf("build new tree fail: %w", err))
 		}
 		return treeName, tree
 	}
 }
+
+func InitForest(builders ...rule.TreeBuilder) { f = rule.NewForest(builders...) }
+
+func RefreshForest() { f = f.Build() }
 
 type webDriver struct {
 	driver.PathParser
