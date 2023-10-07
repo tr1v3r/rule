@@ -37,7 +37,7 @@ import (
 var timeout, _ = time.ParseDuration(os.Getenv("SHUTDOWN_TIMEOUT"))
 
 func main() {
-	var rules []*rule.Rule
+	var rules []rule.Rule
 	web.InitForest(web.DefaultBuilder(rules...))
 
 	if timeout == 0 {

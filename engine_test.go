@@ -1,31 +1,30 @@
-package rule_test
+package rule
 
 import (
 	"encoding/json"
 	"fmt"
 	"testing"
 
-	"github.com/tr1v3r/rule"
 	"github.com/tr1v3r/rule/driver"
 )
 
 func TestBuildTree(t *testing.T) {
 	var testcases = []struct {
-		Rules    []*rule.Rule
+		Rules    []*rule
 		Expected string
 	}{
-		{Rules: []*rule.Rule{
-			{Path: "/a/b/c/d"},
-			{Path: "/a/b/c"},
-			{Path: "/"},
-			{Path: "x/y/z"},
-			{Path: "/a/b/m"},
+		{Rules: []*rule{
+			{path: "/a/b/c/d"},
+			{path: "/a/b/c"},
+			{path: "/"},
+			{path: "x/y/z"},
+			{path: "/a/b/m"},
 		},
 			Expected: `{"a":{"b":{"c":{"d":{}},"m":{}}},"x":{"y":{"z":{}}}}`},
 	}
 
 	for index, item := range testcases {
-		tree, err := rule.NewTree(&struct {
+		tree, err := NewTree(&struct {
 			driver.PathParser
 			driver.StdCalculator
 			driver.DummyOperatorModem
@@ -70,64 +69,64 @@ func TestForest_run(t *testing.T) {
 	}
 }
 
-func InitForest(t *testing.T) *rule.Forest {
-	var builders []rule.TreeBuilder = []rule.TreeBuilder{
-		func() (string, *rule.Tree) {
-			var rules = []*rule.Rule{
-				{Path: "/", Operators: []driver.Operator{
+func InitForest(t *testing.T) Forest {
+	var builders []TreeBuilder = []TreeBuilder{
+		func() Tree {
+			var rules = []*rule{
+				{path: "/", operators: []driver.Operator{
 					&driver.JSONOperator{T: "create", JSONPath: "author.first", V: "river"},
 					&driver.JSONOperator{T: "create", JSONPath: "name", V: "root"},
 				}},
-				{Path: "/a/b/c/d", Operators: []driver.Operator{
+				{path: "/a/b/c/d", operators: []driver.Operator{
 					&driver.JSONOperator{T: "create", JSONPath: "info.path", V: "path:a/b/c/d"},
 				}},
-				{Path: "/a/b/c", Operators: []driver.Operator{
+				{path: "/a/b/c", operators: []driver.Operator{
 					&driver.JSONOperator{T: "create", JSONPath: "info.path", V: "path:a/b/c"},
 				}},
-				{Path: "/a/b", Operators: []driver.Operator{
+				{path: "/a/b", operators: []driver.Operator{
 					&driver.JSONOperator{T: "create", JSONPath: "info.path", V: "path:a/b"},
 				}},
-				{Path: "/x/y/z", Operators: []driver.Operator{
+				{path: "/x/y/z", operators: []driver.Operator{
 					&driver.JSONOperator{T: "create", JSONPath: "info.path", V: "path:x/y/z"},
 				}},
-				{Path: "/a/b/m", Operators: []driver.Operator{
+				{path: "/a/b/m", operators: []driver.Operator{
 					&driver.JSONOperator{T: "create", JSONPath: "info.path", V: "path:a/b/m"},
 				}},
 			}
-			tree, err := rule.NewTree(&struct {
+			tree, err := NewTree(&struct {
 				driver.PathParser
 				driver.StdCalculator
 				driver.DummyOperatorModem
 				driver.DummyDriver // just provide a method Name
 			}{PathParser: driver.SlashPathParser},
-				"json_tree", `{"id":1}`, rules...)
+				"json_tree_1", `{"id":1}`, rules...)
 			if err != nil {
 				t.Errorf("build tree fail: %s", err)
-				return "", nil
+				return nil
 			}
-			return "tree_1", tree
+			return tree
 		},
-		func() (string, *rule.Tree) {
-			var rules = []*rule.Rule{
-				{Path: "/a/b/c/d", Operators: nil},
-				{Path: "/a/b/c", Operators: nil},
-				{Path: "/", Operators: []driver.Operator{&driver.CURLOperator{URL: "https://xxx/ping"}}},
-				{Path: "/x/y/z", Operators: nil},
-				{Path: "/a/b/m", Operators: nil},
+		func() Tree {
+			var rules = []*rule{
+				{path: "/a/b/c/d", operators: nil},
+				{path: "/a/b/c", operators: nil},
+				{path: "/", operators: []driver.Operator{&driver.CURLOperator{URL: "https://xxx/ping"}}},
+				{path: "/x/y/z", operators: nil},
+				{path: "/a/b/m", operators: nil},
 			}
-			tree, err := rule.NewTree(&struct {
+			tree, err := NewTree(&struct {
 				driver.PathParser
 				driver.StdCalculator
 				driver.DummyOperatorModem
 				driver.DummyDriver // just provide a method Name
 			}{PathParser: driver.SlashPathParser},
-				"json_tree", `{"id":2}`, rules...)
+				"json_tree_2", `{"id":2}`, rules...)
 			if err != nil {
 				t.Errorf("build tree fail: %s", err)
-				return "", nil
+				return nil
 			}
-			return "tree_2", tree
+			return tree
 		},
 	}
-	return rule.NewForest(builders...)
+	return NewForest(builders...)
 }
