@@ -1,7 +1,6 @@
 package rule_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/tr1v3r/rule"
@@ -31,9 +30,8 @@ func TestBuildForest_curl_tree(t *testing.T) {
 }
 
 func TestBuildForest_stream(t *testing.T) {
-	var count int
-	trees := stream.SliceOf("https://qq.com", "https://baidu.com").Parallel(64).Convert(func(url string) any {
-		tree, _ := rule.NewYAMLTree(fmt.Sprint("url_", count), "", rule.NewRule("/", &driver.CURLOperator{URL: url}))
+	trees := stream.SliceOf("https://qq.com", "https://163.com").Parallel(64).Convert(func(url string) any {
+		tree, _ := rule.NewYAMLTree("url", "", rule.NewRule("/", &driver.CURLOperator{URL: url}))
 		return tree
 	}).Collect(func(trees ...any) any {
 		var treesArray []rule.Tree
