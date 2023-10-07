@@ -33,7 +33,7 @@ type YAMLOperator struct{}
 
 func (op *YAMLOperator) Type() string                                    { return "" }
 func (op *YAMLOperator) Path() string                                    { return "" }
-func (op *YAMLOperator) Operate(before string) (after string, err error) { return "", nil }
+func (op *YAMLOperator) Operate(before string) (after string, err error) { return before, nil }
 func (op *YAMLOperator) Author() string                                  { return "" }
 func (op *YAMLOperator) CreatedAt() time.Time                            { return time.Now() }
 func (op *YAMLOperator) Load([]byte) error                               { return nil }
