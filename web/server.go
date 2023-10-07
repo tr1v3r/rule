@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/riverchu/pkg/log"
-	"github.com/riverchu/pkg/shutdown"
-	"github.com/riverchu/rule"
-	"github.com/riverchu/rule/driver"
+	"github.com/tr1v3r/pkg/log"
+	"github.com/tr1v3r/pkg/shutdown"
+	"github.com/tr1v3r/rule"
+	"github.com/tr1v3r/rule/driver"
 )
 
 const treeName = "default"

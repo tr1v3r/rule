@@ -3,10 +3,10 @@ package rule
 import (
 	"sort"
 
-	"github.com/riverchu/rule/driver"
+	"github.com/tr1v3r/rule/driver"
 )
 
-// Rule raw rule
+// Rule raw rule for node
 type Rule struct {
 	Path      string
 	Operators []driver.Operator

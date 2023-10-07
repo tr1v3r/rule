@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/riverchu/pkg/fetch"
+	"github.com/tr1v3r/pkg/fetch"
 )
 
 var _ Operator = (*CURLOperator)(nil)

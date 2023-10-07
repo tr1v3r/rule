@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/riverchu/rule/driver"
+	"github.com/tr1v3r/rule/driver"
 )
 
 // NewJSONTree ...
