@@ -8,7 +8,7 @@ import (
 var _ Forest = new(forest)
 
 // TreeBuilder tree build method
-type TreeBuilder func() (tree Tree)
+type TreeBuilder func() Tree
 
 // forest rules forest
 type forest struct {
@@ -21,6 +21,11 @@ type forest struct {
 
 // Register register tree builder
 func (f *forest) Register(builders ...TreeBuilder) { f.appendBuilders(builders...) }
+
+// Refresh refresh rule forest
+func (f *forest) Refresh() {
+	f.Build()
+}
 
 // Build all trees in forest
 func (f *forest) Build() Forest {

@@ -41,7 +41,7 @@ import (
 var timeout, _ = time.ParseDuration(os.Getenv("SHUTDOWN_TIMEOUT"))
 
 func main() {
-	web.InitForest(web.DefaultBuilder(load))
+	web.InitForest(web.DefaultBuilder(load()...))
 
 	go func() {
 		for range time.Tick(5 * time.Second) {
@@ -77,7 +77,7 @@ type RuleDataItem struct {
 	} `json:"operators"`
 }
 
-func load() (rules []*rule.Rule) {
+func load() (rules []rule.Rule) {
 	var filename = os.Getenv("RULES_FILE")
 	if filename == "" {
 		filename = defaultFilename
@@ -106,11 +106,13 @@ func load() (rules []*rule.Rule) {
 				op = new(driver.CURLOperator)
 			}
 			if op != nil {
-				op.Load(opData.Data)
+				if err := op.Load(opData.Data); err != nil {
+					log.Warn("load operate fail: %s\ndata: %s", err, opData.Data)
+				}
 			}
 			ops = append(ops, op)
 		}
-		rules = append(rules, &rule.Rule{Path: line.Path, Operators: ops})
+		rules = append(rules, rule.NewRule(line.Path, ops...))
 	}
 	return rules
 }
