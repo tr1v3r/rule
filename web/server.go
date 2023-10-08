@@ -6,15 +6,16 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/riverchu/pkg/log"
-	"github.com/riverchu/pkg/shutdown"
-	"github.com/riverchu/rule"
-	"github.com/riverchu/rule/driver"
+	"github.com/tr1v3r/pkg/log"
+	"github.com/tr1v3r/pkg/shutdown"
+	"github.com/tr1v3r/rule"
+	"github.com/tr1v3r/rule/driver"
 )
 
 const treeName = "default"
 
-var f *rule.Forest
+
+var f rule.Forest
 
 func Serve(timeout time.Duration, handler http.Handler) {
 	srv := &http.Server{
@@ -41,25 +42,26 @@ func Serve(timeout time.Duration, handler http.Handler) {
 	select {
 	case <-ctx.Done():
 		log.Error("timeout of %s.", timeout)
+	default:
+		log.Info("work done.")
 	}
 	log.Info("Server exiting")
-
-}
-
-func DefaultBuilder(load func() []*rule.Rule) rule.TreeBuilder {
-	return func() (string, *rule.Tree) {
-		tree, err := rule.NewTree(&webDriver{PathParser: driver.SlashPathParser},
-			treeName, `{}`, load()...)
-		if err != nil {
-			panic(fmt.Errorf("build new tree fail: %w", err))
-		}
-		return treeName, tree
-	}
 }
 
 func InitForest(builders ...rule.TreeBuilder) { f = rule.NewForest(builders...) }
 
 func RefreshForest() { f = f.Build() }
+
+func DefaultBuilder(rules ...rule.Rule) rule.TreeBuilder {
+	return func() rule.Tree {
+		tree, err := rule.NewTree(&webDriver{PathParser: driver.SlashPathParser},
+			treeName, `{}`, rules...)
+		if err != nil {
+			panic(fmt.Errorf("build new tree fail: %w", err))
+		}
+		return tree
+	}
+}
 
 type webDriver struct {
 	driver.PathParser

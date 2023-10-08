@@ -1,0 +1,41 @@
+package rule
+
+import (
+	"fmt"
+
+	"github.com/tr1v3r/rule/driver"
+)
+
+// NewForest build a new forest and return it
+func NewForest(builders ...TreeBuilder) Forest {
+	return (&forest{m: make(map[string]Tree, len(builders)), builders: builders}).Build()
+}
+
+// NewJSONTree build a json rule tree
+func NewJSONTree[R Rule](name, template string, rules ...R) (Tree, error) {
+	return NewTree(driver.NewJSONDriver(), name, template, rules...)
+}
+
+// NewYAMLTree build a yaml rule tree
+func NewYAMLTree[R Rule](name, template string, rules ...R) (Tree, error) {
+	return NewTree(driver.NewYAMLDriver(), name, template, rules...)
+}
+
+// NewTree build a rule tree.
+func NewTree[R Rule](diver driver.Driver, name, template string, rules ...R) (Tree, error) {
+	tree := &tree[R]{
+		name: name,
+
+		rule:     template,
+		driver:   diver,
+		children: make(map[string]Tree),
+	}
+	if err := tree.build(rules...); err != nil {
+		return nil, fmt.Errorf("build tree by rules fail: %w", err)
+	}
+	return tree, nil
+}
+
+func NewRule(path string, operators ...driver.Operator) Rule {
+	return &rule{path, operators}
+}

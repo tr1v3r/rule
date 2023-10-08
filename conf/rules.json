@@ -1,0 +1,15 @@
+[
+	{
+		"path": "/",
+		"operators": [
+			{
+				"type": "curl",
+				"data": {
+					"url": "https://r1v3.com/ping",
+					"author": "",
+					"created_at": "2023-05-17T23:17:19.91246+08:00"
+				}
+			}
+		]
+	}
+]

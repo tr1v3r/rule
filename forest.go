@@ -5,38 +5,33 @@ import (
 	"sync"
 )
 
+var _ Forest = new(forest)
+
 // TreeBuilder tree build method
-type TreeBuilder func() (name string, tree *Tree)
+type TreeBuilder func() (tree Tree)
 
-// NewForest build a new forest and return it
-func NewForest(builders ...TreeBuilder) *Forest {
-	return (&Forest{m: make(map[string]*Tree, 16), builders: builders}).Build()
-}
-
-// Forest rules forest
-type Forest struct {
+// forest rules forest
+type forest struct {
 	mu sync.RWMutex
-	m  map[string]*Tree
+	m  map[string]Tree
 
 	bMu      sync.RWMutex
 	builders []TreeBuilder
 }
 
 // Register register tree builder
-func (f *Forest) Register(builders ...TreeBuilder) {
-	f.addBuilders(builders...)
-}
+func (f *forest) Register(builders ...TreeBuilder) { f.appendBuilders(builders...) }
 
 // Build all trees in forest
-func (f *Forest) Build() *Forest {
-	for _, builder := range f.getBuilders() {
-		f.Set(builder())
+func (f *forest) Build() Forest {
+	for _, build := range f.getBuilders() {
+		f.Set(build())
 	}
 	return f
 }
 
 // Append append tree and builder to forest
-func (f *Forest) Append(builders ...TreeBuilder) *Forest {
+func (f *forest) Append(builders ...TreeBuilder) Forest {
 	for _, builder := range f.getBuilders() {
 		f.Register(builder)
 		f.Set(builder())
@@ -45,14 +40,14 @@ func (f *Forest) Append(builders ...TreeBuilder) *Forest {
 }
 
 // Get get rule tree by name
-func (f *Forest) Get(name string) *Tree {
+func (f *forest) Get(name string) Tree {
 	f.mu.RLock()
 	defer f.mu.RUnlock()
 	return f.m[name]
 }
 
 // Set set rule tree
-func (f *Forest) Set(name string, tree *Tree) {
+func (f *forest) Set(tree Tree) {
 	if tree == nil {
 		return
 	}
@@ -60,23 +55,23 @@ func (f *Forest) Set(name string, tree *Tree) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	if f.m == nil {
-		f.m = make(map[string]*Tree, 16)
+		f.m = make(map[string]Tree, 16)
 	}
-	f.m[name] = tree
+	f.m[tree.Name()] = tree
 }
 
 // Info ...
-func (f *Forest) Info() string {
+func (f *forest) Info() string {
 	return fmt.Sprintf("forest got %d tree: %s", f.count(), f.names())
 }
 
-func (f *Forest) count() int {
+func (f *forest) count() int {
 	f.mu.RLock()
 	defer f.mu.RUnlock()
 	return len(f.m)
 }
 
-func (f *Forest) names() (names []string) {
+func (f *forest) names() (names []string) {
 	f.mu.RLock()
 	defer f.mu.RUnlock()
 	for name := range f.m {
@@ -85,12 +80,12 @@ func (f *Forest) names() (names []string) {
 	return
 }
 
-func (f *Forest) getBuilders() []TreeBuilder {
+func (f *forest) getBuilders() []TreeBuilder {
 	f.bMu.RLock()
 	defer f.bMu.RUnlock()
 	return f.builders
 }
-func (f *Forest) addBuilders(builders ...TreeBuilder) {
+func (f *forest) appendBuilders(builders ...TreeBuilder) {
 	f.bMu.Lock()
 	defer f.bMu.Unlock()
 	f.builders = append(f.builders, builders...)
