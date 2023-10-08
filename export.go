@@ -2,6 +2,7 @@ package rule
 
 import (
 	"encoding/json"
+	"time"
 
 	"github.com/tr1v3r/rule/driver"
 )
@@ -9,10 +10,17 @@ import (
 // Forest rule forest
 type Forest interface {
 	Register(...TreeBuilder)
-	Build() Forest
 	Append(...TreeBuilder) Forest
+
+	Build() Forest
+	// Refresh refresh Forest
+	// interval is optional and only first value is useful when set
+	// blocks when the interval is set
+	Refresh(interval ...time.Duration)
+
 	Get(name string) Tree
 	Set(tree Tree)
+
 	Info() string
 }
 

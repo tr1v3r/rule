@@ -3,6 +3,7 @@ package rule
 import (
 	"fmt"
 	"sync"
+	"time"
 )
 
 var _ Forest = new(forest)
@@ -23,8 +24,14 @@ type forest struct {
 func (f *forest) Register(builders ...TreeBuilder) { f.appendBuilders(builders...) }
 
 // Refresh refresh rule forest
-func (f *forest) Refresh() {
-	f.Build()
+func (f *forest) Refresh(interval ...time.Duration) {
+	if len(interval) == 0 {
+		f.Build()
+		return
+	}
+	for range time.Tick(interval[0]) { // nolint
+		f.Build()
+	}
 }
 
 // Build all trees in forest
