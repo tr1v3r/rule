@@ -9,7 +9,7 @@ require (
 	github.com/swaggo/swag v1.16.2
 	github.com/tidwall/sjson v1.2.5
 	github.com/tr1v3r/pkg v0.0.20
-	github.com/tr1v3r/stream v0.0.0-20231007120305-f6dbc2e1b749
+	github.com/tr1v3r/stream v0.0.1
 	gopkg.in/yaml.v2 v2.4.0
 )
 
