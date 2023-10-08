@@ -14,6 +14,7 @@ import (
 
 const treeName = "default"
 
+
 var f rule.Forest
 
 func Serve(timeout time.Duration, handler http.Handler) {
@@ -48,6 +49,8 @@ func Serve(timeout time.Duration, handler http.Handler) {
 }
 
 func InitForest(builders ...rule.TreeBuilder) { f = rule.NewForest(builders...) }
+
+func RefreshForest() { f = f.Build() }
 
 func DefaultBuilder(rules ...rule.Rule) rule.TreeBuilder {
 	return func() rule.Tree {

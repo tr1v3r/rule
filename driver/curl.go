@@ -15,15 +15,15 @@ var _ Operator = (*CURLOperator)(nil)
 // CURLOperator
 type CURLOperator struct {
 	// P is the target path of the operator
-	P string `json:"path"`
+	P string `json:"path,omitempty"`
 
 	// URL the target url
 	URL string `json:"url"`
 	// Method the method to call URL
-	Method string `json:"method"`
+	Method string `json:"method,omitempty"`
 	// Body post with data
-	Body   []byte `json:"body"`
-	Header map[string][]string
+	Body   []byte              `json:"body,omitempty"`
+	Header map[string][]string `json:"header,omitempty"`
 
 	// A is the author of the operator
 	A string `json:"author"`

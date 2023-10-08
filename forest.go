@@ -48,6 +48,10 @@ func (f *forest) Get(name string) Tree {
 
 // Set set rule tree
 func (f *forest) Set(tree Tree) {
+	if tree == nil {
+		return
+	}
+
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	if f.m == nil {

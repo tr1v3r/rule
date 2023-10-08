@@ -48,6 +48,9 @@ type StdCalculator struct{}
 func (d *StdCalculator) CalcRule(template string, ops ...Operator) (string, error) {
 	var err error
 	for _, op := range ops {
+		if op == nil {
+			continue
+		}
 		if template, err = op.Operate(template); err != nil {
 			return "", fmt.Errorf("operate fail: %w", err)
 		}

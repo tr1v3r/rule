@@ -49,6 +49,10 @@ func (t *tree[R]) SetRule(r Rule) error {
 
 // GetRule get a rule from tree.
 func (t *tree[R]) GetRule(path string) string {
+	if t == nil {
+		return ""
+	}
+  
 	if subTree := t.pickChild(t.driver.GetNameByLevel(path, t.level+1)); subTree != nil {
 		return subTree.GetRule(path)
 	}
