@@ -11,11 +11,11 @@ import (
 	swaggerFiles "github.com/swaggo/files"     // swagger embed files
 	ginSwagger "github.com/swaggo/gin-swagger" // gin-swagger middleware
 
-	"github.com/riverchu/pkg/log"
-	"github.com/riverchu/rule"
-	_ "github.com/riverchu/rule/docs"
-	"github.com/riverchu/rule/driver"
-	"github.com/riverchu/rule/web"
+	"github.com/tr1v3r/pkg/log"
+	"github.com/tr1v3r/rule"
+	_ "github.com/tr1v3r/rule/docs"
+	"github.com/tr1v3r/rule/driver"
+	"github.com/tr1v3r/rule/web"
 )
 
 //	@title			R1v3r's rule engine

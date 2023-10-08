@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/riverchu/rule/driver"
+	"github.com/tr1v3r/rule/driver"
 )
 
 func Test_Rule(t *testing.T) {
