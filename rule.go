@@ -6,6 +6,8 @@ import (
 	"github.com/tr1v3r/rule/driver"
 )
 
+var _ Rule = (*rule)(nil)
+
 // rule raw rule for node
 type rule struct {
 	path      string

@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-var _ Forest = new(forest)
+var _ Forest = (*forest)(nil)
 
 // TreeBuilder tree build method
 type TreeBuilder func() Tree
