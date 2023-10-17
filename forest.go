@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-var _ Forest = new(forest)
+var _ Forest = (*forest)(nil)
 
 // TreeBuilder tree build method
 type TreeBuilder func() Tree
@@ -18,10 +18,18 @@ type forest struct {
 
 	bMu      sync.RWMutex
 	builders []TreeBuilder
+	builderM map[string]TreeBuilder
 }
 
 // Register register tree builder
 func (f *forest) Register(builders ...TreeBuilder) { f.appendBuilders(builders...) }
+
+// BindTreeBuilder bind tree and builder
+func (f *forest) BindTreeBuilder(name string, builder TreeBuilder) {
+	f.bMu.Lock()
+	defer f.bMu.Unlock()
+	f.builderM[name] = builder
+}
 
 // Refresh refresh rule forest
 func (f *forest) Refresh(interval ...time.Duration) {
@@ -34,10 +42,19 @@ func (f *forest) Refresh(interval ...time.Duration) {
 	}
 }
 
+// RefreshTree refresh tree
+func (f *forest) RefreshTree(name string) {
+	if build := f.getBuilder(name); build != nil {
+		f.Set(build())
+	}
+}
+
 // Build all trees in forest
 func (f *forest) Build() Forest {
 	for _, build := range f.getBuilders() {
-		f.Set(build())
+		tree := build()
+		f.Set(tree)
+		f.BindTreeBuilder(tree.Name(), build)
 	}
 	return f
 }
@@ -101,4 +118,9 @@ func (f *forest) appendBuilders(builders ...TreeBuilder) {
 	f.bMu.Lock()
 	defer f.bMu.Unlock()
 	f.builders = append(f.builders, builders...)
+}
+func (f *forest) getBuilder(name string) TreeBuilder {
+	f.bMu.RLock()
+	defer f.bMu.RUnlock()
+	return f.builderM[name]
 }

@@ -8,7 +8,7 @@ import (
 	"github.com/tr1v3r/rule/driver"
 )
 
-var _ Tree = new(tree[Rule])
+var _ Tree = (*tree[Rule])(nil)
 
 // tree is a rule tree structure.
 type tree[R Rule] struct {
@@ -52,7 +52,7 @@ func (t *tree[R]) GetRule(path string) string {
 	if t == nil {
 		return ""
 	}
-  
+
 	if subTree := t.pickChild(t.driver.GetNameByLevel(path, t.level+1)); subTree != nil {
 		return subTree.GetRule(path)
 	}

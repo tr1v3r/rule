@@ -17,6 +17,8 @@ type Forest interface {
 	// interval is optional and only first value is useful when set
 	// blocks when the interval is set
 	Refresh(interval ...time.Duration)
+	// RefreshTree refresh specified tree
+	RefreshTree(name string)
 
 	Get(name string) Tree
 	Set(tree Tree)

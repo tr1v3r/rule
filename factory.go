@@ -8,7 +8,11 @@ import (
 
 // NewForest build a new forest and return it
 func NewForest(builders ...TreeBuilder) Forest {
-	return (&forest{m: make(map[string]Tree, len(builders)), builders: builders}).Build()
+	return (&forest{
+		m:        make(map[string]Tree, len(builders)),
+		builders: builders,
+		builderM: make(map[string]TreeBuilder, len(builders)),
+	}).Build()
 }
 
 // NewJSONTree build a json rule tree
