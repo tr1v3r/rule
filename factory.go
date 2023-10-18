@@ -30,7 +30,7 @@ func NewTree[R Rule](diver driver.Driver, name, template string, rules ...R) (Tr
 	tree := &tree[R]{
 		name: name,
 
-		rule:     template,
+		rule:     []byte(template),
 		driver:   diver,
 		children: make(map[string]Tree),
 	}

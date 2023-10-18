@@ -45,7 +45,7 @@ type JSONProcessor struct {
 	// JSONPath is the json path of the Processor
 	JSONPath string `json:"json_path"`
 	// V is the value of the Processor
-	V string `json:"value"`
+	V []byte `json:"value"`
 
 	// A is the author of the Processor
 	A string `json:"author"`
@@ -67,15 +67,15 @@ func (op *JSONProcessor) Save() []byte {
 	data, _ := json.Marshal(op)
 	return data
 }
-func (op *JSONProcessor) Process(before string) (after string, err error) {
+func (op *JSONProcessor) Process(before []byte) (after []byte, err error) {
 	switch op.T {
 	case "create", "append", "replace":
-		return sjson.Set(before, op.JSONPath, op.V)
+		return sjson.SetBytes(before, op.JSONPath, op.V)
 	case "set":
-		return sjson.SetRaw(before, op.JSONPath, op.V)
+		return sjson.SetRawBytes(before, op.JSONPath, op.V)
 	case "delete":
-		return sjson.Delete(before, op.JSONPath)
+		return sjson.DeleteBytes(before, op.JSONPath)
 	default:
-		return "", fmt.Errorf("unknown Processor type: %s", op.T)
+		return nil, fmt.Errorf("unknown Processor type: %s", op.T)
 	}
 }

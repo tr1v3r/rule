@@ -23,7 +23,7 @@ type PathParser interface {
 // Calculator rule calculator
 type Calculator interface {
 	// CalcRule calc rule
-	CalcRule(template string, ops ...Processor) (string, error)
+	CalcRule(template []byte, ops ...Processor) ([]byte, error)
 }
 
 // Modem Processors modem
@@ -43,7 +43,7 @@ type Processor interface {
 	// Type return processor type
 	Type() string
 	// Process do process rule
-	Process(before string) (after string, err error)
+	Process(before []byte) (after []byte, err error)
 
 	// informatin
 	Author() string

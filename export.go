@@ -31,7 +31,7 @@ type Tree interface {
 	Name() string
 
 	SetRule(Rule) error
-	GetRule(path string) string
+	GetRule(path string) []byte
 
 	HasNode(path string) bool
 	DelNode(path string) error

@@ -19,7 +19,7 @@ type tree[R Rule] struct {
 
 	// current node rule
 	ruleMu sync.RWMutex
-	rule   string
+	rule   []byte
 	ops    []driver.Processor
 
 	// for subtree
@@ -48,9 +48,9 @@ func (t *tree[R]) SetRule(r Rule) error {
 }
 
 // GetRule get a rule from tree.
-func (t *tree[R]) GetRule(path string) string {
+func (t *tree[R]) GetRule(path string) []byte {
 	if t == nil {
-		return ""
+		return nil
 	}
 
 	if subTree := t.pickChild(t.driver.GetNameByLevel(path, t.level+1)); subTree != nil {
@@ -173,7 +173,7 @@ func (t *tree[R]) updateRule(ops ...driver.Processor) error {
 }
 
 // getRule return current node rule.
-func (t *tree[R]) getRule() string {
+func (t *tree[R]) getRule() []byte {
 	t.ruleMu.RLock()
 	defer t.ruleMu.RUnlock()
 	return t.rule

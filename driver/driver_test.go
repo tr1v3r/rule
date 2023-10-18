@@ -56,18 +56,18 @@ func TestDriver_Marshal(t *testing.T) {
 }
 
 func TestJSONDriver(t *testing.T) {
-	var rule string
+	var rule []byte
 
 	d := driver.NewJSONDriver()
 
 	data, err := d.Marshal([]driver.Processor{
-		&driver.JSONProcessor{T: "create", JSONPath: "name.first", V: "river"},
-		&driver.JSONProcessor{T: "create", JSONPath: "name.last", V: "chu"},
-		&driver.JSONProcessor{T: "create", JSONPath: "name.last", V: "Chu"},
-		&driver.JSONProcessor{T: "append", JSONPath: "dear.friends.-1", V: "tom"},
-		&driver.JSONProcessor{T: "append", JSONPath: "dear.friends.-1", V: "ken"},
-		&driver.JSONProcessor{T: "set", JSONPath: "dear.family", V: `["mom","dad","bro"]`},
-		&driver.JSONProcessor{T: "create", JSONPath: "name.verbose", V: "verbose"},
+		&driver.JSONProcessor{T: "create", JSONPath: "name.first", V: []byte("river")},
+		&driver.JSONProcessor{T: "create", JSONPath: "name.last", V: []byte("chu")},
+		&driver.JSONProcessor{T: "create", JSONPath: "name.last", V: []byte("Chu")},
+		&driver.JSONProcessor{T: "append", JSONPath: "dear.friends.-1", V: []byte("tom")},
+		&driver.JSONProcessor{T: "append", JSONPath: "dear.friends.-1", V: []byte("ken")},
+		&driver.JSONProcessor{T: "set", JSONPath: "dear.family", V: []byte(`["mom","dad","bro"]`)},
+		&driver.JSONProcessor{T: "create", JSONPath: "name.verbose", V: []byte("verbose")},
 		&driver.JSONProcessor{T: "delete", JSONPath: "name.verbose"},
 	}...)
 	if err != nil {
@@ -90,24 +90,24 @@ func TestJSONDriver(t *testing.T) {
 }
 
 func TestYAMLProcessor(t *testing.T) {
-	var rule string
+	var rule []byte
+	var err error
 
-	f, err := os.ReadFile("/tmp/rule.yml")
+	rule, err = os.ReadFile("/tmp/rule.yml")
 	if err != nil {
 		t.Errorf("read file fail: %s", err)
 		return
 	}
-	rule = string(f)
 
 	var ops = []driver.Processor{
-		&driver.RawProcessor{Proc: func(before string) (string, error) {
+		&driver.RawProcessor{Proc: func(before []byte) ([]byte, error) {
 			var result any
 			if err := yaml.Unmarshal([]byte(before), &result); err != nil {
-				return "", fmt.Errorf("unmarshal rule fail: %w", err)
+				return nil, fmt.Errorf("unmarshal rule fail: %w", err)
 			}
 			result.(map[string]any)["unit"] = "test"
 			newData, err := yaml.Marshal(result)
-			return string(newData), err
+			return newData, err
 		}},
 	}
 	for _, op := range ops {
