@@ -10,12 +10,12 @@ var _ Rule = (*rule)(nil)
 
 // rule raw rule for node
 type rule struct {
-	path      string
-	operators []driver.Operator
+	path       string
+	processors []driver.Processor
 }
 
-func (r *rule) Path() string                 { return r.path }
-func (r *rule) Operators() []driver.Operator { return r.operators }
+func (r *rule) Path() string                   { return r.path }
+func (r *rule) Processors() []driver.Processor { return r.processors }
 
 // rules rules array
 type rules[R Rule] []R

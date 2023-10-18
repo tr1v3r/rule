@@ -4,5 +4,5 @@ import "errors"
 
 var (
 	// ErrSerializeNotSupport not support serialize error
-	ErrSerializeNotSupport = errors.New("operator not support serialize")
+	ErrSerializeNotSupport = errors.New("Processor not support serialize")
 )

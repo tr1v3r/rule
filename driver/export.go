@@ -23,33 +23,33 @@ type PathParser interface {
 // Calculator rule calculator
 type Calculator interface {
 	// CalcRule calc rule
-	CalcRule(template string, ops ...Operator) (string, error)
+	CalcRule(template string, ops ...Processor) (string, error)
 }
 
-// Modem operators modem
+// Modem Processors modem
 type Modem interface {
-	// OperatorsForSave get operators data for save
-	Marshal(...Operator) ([]byte, error)
+	// ProcessorsForSave get Processors data for save
+	Marshal(...Processor) ([]byte, error)
 
-	// LoadOperators load operators from data
-	Unmarshal(data []byte) ([]Operator, error)
+	// LoadProcessors load Processors from data
+	Unmarshal(data []byte) ([]Processor, error)
 }
 
-// Operator rule operator
-type Operator interface {
+// Processor rule processor
+type Processor interface {
 	// Path return target tree path, not necessary
 	Path() string
 
-	// Type return operator type
+	// Type return processor type
 	Type() string
-	// Operate do operate rule
-	Operate(before string) (after string, err error)
+	// Process do process rule
+	Process(before string) (after string, err error)
 
 	// informatin
 	Author() string
 	CreatedAt() time.Time
 
-	// Load load operator from data
+	// Load load Processor from data
 	Load([]byte) error
 	// Save ...
 	Save() []byte

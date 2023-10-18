@@ -60,15 +60,15 @@ func TestJSONDriver(t *testing.T) {
 
 	d := driver.NewJSONDriver()
 
-	data, err := d.Marshal([]driver.Operator{
-		&driver.JSONOperator{T: "create", JSONPath: "name.first", V: "river"},
-		&driver.JSONOperator{T: "create", JSONPath: "name.last", V: "chu"},
-		&driver.JSONOperator{T: "create", JSONPath: "name.last", V: "Chu"},
-		&driver.JSONOperator{T: "append", JSONPath: "dear.friends.-1", V: "tom"},
-		&driver.JSONOperator{T: "append", JSONPath: "dear.friends.-1", V: "ken"},
-		&driver.JSONOperator{T: "set", JSONPath: "dear.family", V: `["mom","dad","bro"]`},
-		&driver.JSONOperator{T: "create", JSONPath: "name.verbose", V: "verbose"},
-		&driver.JSONOperator{T: "delete", JSONPath: "name.verbose"},
+	data, err := d.Marshal([]driver.Processor{
+		&driver.JSONProcessor{T: "create", JSONPath: "name.first", V: "river"},
+		&driver.JSONProcessor{T: "create", JSONPath: "name.last", V: "chu"},
+		&driver.JSONProcessor{T: "create", JSONPath: "name.last", V: "Chu"},
+		&driver.JSONProcessor{T: "append", JSONPath: "dear.friends.-1", V: "tom"},
+		&driver.JSONProcessor{T: "append", JSONPath: "dear.friends.-1", V: "ken"},
+		&driver.JSONProcessor{T: "set", JSONPath: "dear.family", V: `["mom","dad","bro"]`},
+		&driver.JSONProcessor{T: "create", JSONPath: "name.verbose", V: "verbose"},
+		&driver.JSONProcessor{T: "delete", JSONPath: "name.verbose"},
 	}...)
 	if err != nil {
 		t.Errorf("marshal fail: %s", err)
@@ -80,16 +80,16 @@ func TestJSONDriver(t *testing.T) {
 		return
 	}
 	for _, op := range ops {
-		rule, err = op.Operate(rule)
+		rule, err = op.Process(rule)
 		if err != nil {
-			t.Errorf("operate fail: %s", err)
+			t.Errorf("Process fail: %s", err)
 			return
 		}
 	}
 	t.Logf("got result: %s", rule)
 }
 
-func TestYAMLOperator(t *testing.T) {
+func TestYAMLProcessor(t *testing.T) {
 	var rule string
 
 	f, err := os.ReadFile("/tmp/rule.yml")
@@ -99,8 +99,8 @@ func TestYAMLOperator(t *testing.T) {
 	}
 	rule = string(f)
 
-	var ops = []driver.Operator{
-		&driver.RawOperator{Proc: func(before string) (string, error) {
+	var ops = []driver.Processor{
+		&driver.RawProcessor{Proc: func(before string) (string, error) {
 			var result any
 			if err := yaml.Unmarshal([]byte(before), &result); err != nil {
 				return "", fmt.Errorf("unmarshal rule fail: %w", err)
@@ -111,9 +111,9 @@ func TestYAMLOperator(t *testing.T) {
 		}},
 	}
 	for _, op := range ops {
-		rule, err = op.Operate(rule)
+		rule, err = op.Process(rule)
 		if err != nil {
-			t.Errorf("operate fail: %s", err)
+			t.Errorf("Process fail: %s", err)
 			return
 		}
 	}

@@ -73,24 +73,24 @@ func InitForest(t *testing.T) Forest {
 	var builders []TreeBuilder = []TreeBuilder{
 		func() Tree {
 			var rules = []*rule{
-				{path: "/", operators: []driver.Operator{
-					&driver.JSONOperator{T: "create", JSONPath: "author.first", V: "river"},
-					&driver.JSONOperator{T: "create", JSONPath: "name", V: "root"},
+				{path: "/", processors: []driver.Processor{
+					&driver.JSONProcessor{T: "create", JSONPath: "author.first", V: "river"},
+					&driver.JSONProcessor{T: "create", JSONPath: "name", V: "root"},
 				}},
-				{path: "/a/b/c/d", operators: []driver.Operator{
-					&driver.JSONOperator{T: "create", JSONPath: "info.path", V: "path:a/b/c/d"},
+				{path: "/a/b/c/d", processors: []driver.Processor{
+					&driver.JSONProcessor{T: "create", JSONPath: "info.path", V: "path:a/b/c/d"},
 				}},
-				{path: "/a/b/c", operators: []driver.Operator{
-					&driver.JSONOperator{T: "create", JSONPath: "info.path", V: "path:a/b/c"},
+				{path: "/a/b/c", processors: []driver.Processor{
+					&driver.JSONProcessor{T: "create", JSONPath: "info.path", V: "path:a/b/c"},
 				}},
-				{path: "/a/b", operators: []driver.Operator{
-					&driver.JSONOperator{T: "create", JSONPath: "info.path", V: "path:a/b"},
+				{path: "/a/b", processors: []driver.Processor{
+					&driver.JSONProcessor{T: "create", JSONPath: "info.path", V: "path:a/b"},
 				}},
-				{path: "/x/y/z", operators: []driver.Operator{
-					&driver.JSONOperator{T: "create", JSONPath: "info.path", V: "path:x/y/z"},
+				{path: "/x/y/z", processors: []driver.Processor{
+					&driver.JSONProcessor{T: "create", JSONPath: "info.path", V: "path:x/y/z"},
 				}},
-				{path: "/a/b/m", operators: []driver.Operator{
-					&driver.JSONOperator{T: "create", JSONPath: "info.path", V: "path:a/b/m"},
+				{path: "/a/b/m", processors: []driver.Processor{
+					&driver.JSONProcessor{T: "create", JSONPath: "info.path", V: "path:a/b/m"},
 				}},
 			}
 			tree, err := NewTree(&struct {
@@ -108,11 +108,11 @@ func InitForest(t *testing.T) Forest {
 		},
 		func() Tree {
 			var rules = []*rule{
-				{path: "/a/b/c/d", operators: nil},
-				{path: "/a/b/c", operators: nil},
-				{path: "/", operators: []driver.Operator{&driver.CURLOperator{URL: "https://xxx/ping"}}},
-				{path: "/x/y/z", operators: nil},
-				{path: "/a/b/m", operators: nil},
+				{path: "/a/b/c/d", processors: nil},
+				{path: "/a/b/c", processors: nil},
+				{path: "/", processors: []driver.Processor{&driver.CURLProcessor{URL: "https://xxx/ping"}}},
+				{path: "/x/y/z", processors: nil},
+				{path: "/a/b/m", processors: nil},
 			}
 			tree, err := NewTree(&struct {
 				driver.Modem

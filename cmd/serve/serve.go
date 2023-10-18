@@ -70,11 +70,11 @@ func register(r *gin.Engine) *gin.Engine {
 var defaultFilename = "../../conf/rules.json"
 
 type RuleDataItem struct {
-	Path      string `json:"path"`
-	Operators []struct {
+	Path       string `json:"path"`
+	Processors []struct {
 		Type string          `json:"type"`
 		Data json.RawMessage `json:"data"`
-	} `json:"operators"`
+	} `json:"Processors"`
 }
 
 func load() (rules []rule.Rule) {
@@ -94,20 +94,20 @@ func load() (rules []rule.Rule) {
 		return nil
 	}
 	for _, line := range items {
-		var ops []driver.Operator
-		for _, opData := range line.Operators {
-			var op driver.Operator
+		var ops []driver.Processor
+		for _, opData := range line.Processors {
+			var op driver.Processor
 			switch opData.Type {
 			case "json":
-				op = new(driver.JSONOperator)
+				op = new(driver.JSONProcessor)
 			case "yaml":
-				op = new(driver.YAMLOperator)
+				op = new(driver.YAMLProcessor)
 			case "curl":
-				op = new(driver.CURLOperator)
+				op = new(driver.CURLProcessor)
 			}
 			if op != nil {
 				if err := op.Load(opData.Data); err != nil {
-					log.Warn("load operate fail: %s\ndata: %s", err, opData.Data)
+					log.Warn("load Process fail: %s\ndata: %s", err, opData.Data)
 				}
 			}
 			ops = append(ops, op)

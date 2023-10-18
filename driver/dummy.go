@@ -6,7 +6,7 @@ import (
 
 var _ Driver = (*DummyDriver)(nil)
 
-var DummyModem = &GeneralModem[Operator]{
+var DummyModem = &GeneralModem[Processor]{
 	Marshaler:   func(any) ([]byte, error) { return nil, nil },
 	Unmarshaler: func([]byte, any) error { return nil },
 }
@@ -29,14 +29,14 @@ type DummyDriver struct {
 
 func (DummyDriver) Name() string { return "dummy" }
 
-var _ Operator = (*DummyOperator)(nil)
+var _ Processor = (*DummyProcessor)(nil)
 
-type DummyOperator struct{}
+type DummyProcessor struct{}
 
-func (op *DummyOperator) Type() string                                    { return "dummy" }
-func (op *DummyOperator) Path() string                                    { return "" }
-func (op *DummyOperator) Operate(before string) (after string, err error) { return "", nil }
-func (op *DummyOperator) Author() string                                  { return "dummy" }
-func (op *DummyOperator) CreatedAt() time.Time                            { return time.Now() }
-func (op *DummyOperator) Load([]byte) error                               { return nil }
-func (op *DummyOperator) Save() []byte                                    { return nil }
+func (op *DummyProcessor) Type() string                                    { return "dummy" }
+func (op *DummyProcessor) Path() string                                    { return "" }
+func (op *DummyProcessor) Process(before string) (after string, err error) { return "", nil }
+func (op *DummyProcessor) Author() string                                  { return "dummy" }
+func (op *DummyProcessor) CreatedAt() time.Time                            { return time.Now() }
+func (op *DummyProcessor) Load([]byte) error                               { return nil }
+func (op *DummyProcessor) Save() []byte                                    { return nil }

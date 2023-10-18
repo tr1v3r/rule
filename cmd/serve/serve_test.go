@@ -10,11 +10,11 @@ import (
 
 func Test_Rule(t *testing.T) {
 	var items = []RuleDataItem{
-		{Path: "/", Operators: []struct {
+		{Path: "/", Processors: []struct {
 			Type string          `json:"type"`
 			Data json.RawMessage `json:"data"`
 		}{
-			{Type: "curl", Data: (&driver.CURLOperator{URL: "https://r1v3.com/ping", C: time.Now()}).Save()},
+			{Type: "curl", Data: (&driver.CURLProcessor{URL: "https://r1v3.com/ping", C: time.Now()}).Save()},
 		}},
 	}
 

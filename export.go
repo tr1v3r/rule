@@ -36,11 +36,11 @@ type Tree interface {
 	HasNode(path string) bool
 	DelNode(path string) error
 	ShowStruct() json.RawMessage
-	GetOperators() []driver.Operator
+	GetProcessors() []driver.Processor
 }
 
 // Rule rule for tree
 type Rule interface {
 	Path() string
-	Operators() []driver.Operator
+	Processors() []driver.Processor
 }

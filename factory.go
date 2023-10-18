@@ -40,6 +40,6 @@ func NewTree[R Rule](diver driver.Driver, name, template string, rules ...R) (Tr
 	return tree, nil
 }
 
-func NewRule(path string, operators ...driver.Operator) Rule {
-	return &rule{path, operators}
+func NewRule(path string, Processors ...driver.Processor) Rule {
+	return &rule{path, Processors}
 }
