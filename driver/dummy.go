@@ -15,7 +15,7 @@ var DummyModem = &GeneralModem[Processor]{
 func NewDummyDriver() *DummyDriver {
 	return &DummyDriver{
 		PathParser: new(DelimiterPathParser).WithDelimiter("/"),
-		Calculator: new(StdCalculator),
+		Realizer:   new(StdRealizer),
 		Modem:      DummyModem,
 	}
 }
@@ -23,7 +23,7 @@ func NewDummyDriver() *DummyDriver {
 // DummyDriver return a dummy driver
 type DummyDriver struct {
 	PathParser
-	Calculator
+	Realizer
 	Modem
 }
 

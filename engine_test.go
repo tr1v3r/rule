@@ -27,7 +27,7 @@ func TestBuildTree(t *testing.T) {
 		tree, err := NewTree(&struct {
 			driver.Modem
 			driver.PathParser
-			driver.StdCalculator
+			driver.StdRealizer
 			driver.DummyDriver // just provide a method Name
 		}{Modem: driver.DummyModem, PathParser: driver.SlashPathParser},
 			"unit_test_"+fmt.Sprint(index), "{}", item.Rules...)
@@ -96,7 +96,7 @@ func InitForest(t *testing.T) Forest {
 			tree, err := NewTree(&struct {
 				driver.Modem
 				driver.PathParser
-				driver.StdCalculator
+				driver.StdRealizer
 				driver.DummyDriver // just provide a method Name
 			}{Modem: driver.DummyModem, PathParser: driver.SlashPathParser},
 				"json_tree_1", `{"id":1}`, rules...)
@@ -117,7 +117,7 @@ func InitForest(t *testing.T) Forest {
 			tree, err := NewTree(&struct {
 				driver.Modem
 				driver.PathParser
-				driver.StdCalculator
+				driver.StdRealizer
 				driver.DummyDriver // just provide a method Name
 			}{Modem: driver.DummyModem, PathParser: driver.SlashPathParser},
 				"json_tree_2", `{"id":2}`, rules...)

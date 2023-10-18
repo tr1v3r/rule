@@ -66,7 +66,7 @@ type webDriver struct {
 	driver.Modem
 	driver.PathParser
 
-	driver.StdCalculator
+	driver.StdRealizer
 }
 
 func (webDriver) Name() string { return "default" }

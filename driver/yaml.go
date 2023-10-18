@@ -10,7 +10,7 @@ var _ Driver = (*YAMLDriver)(nil)
 func NewYAMLDriver() *YAMLDriver {
 	return &YAMLDriver{
 		PathParser: new(DelimiterPathParser).WithDelimiter("/"),
-		Calculator: new(StdCalculator),
+		Realizer:   new(StdRealizer),
 		Modem: &GeneralModem[*YAMLProcessor]{
 			Marshaler:   json.Marshal,
 			Unmarshaler: json.Unmarshal,
@@ -21,7 +21,7 @@ func NewYAMLDriver() *YAMLDriver {
 // YAMLDriver is a driver for YAML type rule tree
 type YAMLDriver struct {
 	PathParser
-	Calculator
+	Realizer
 	Modem
 }
 

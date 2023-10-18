@@ -7,7 +7,7 @@ type Driver interface {
 	Name() string
 
 	PathParser
-	Calculator
+	Realizer
 	Modem
 }
 
@@ -20,10 +20,10 @@ type PathParser interface {
 	GetNameByLevel(path string, level int) (name string)
 }
 
-// Calculator rule calculator
-type Calculator interface {
-	// CalcRule calc rule
-	CalcRule(template []byte, ops ...Processor) ([]byte, error)
+// Realizer realize rule
+type Realizer interface {
+	// Realize realize rule
+	Realize(rule []byte, ops ...Processor) ([]byte, error)
 }
 
 // Modem Processors modem

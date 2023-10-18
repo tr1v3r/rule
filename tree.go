@@ -30,7 +30,7 @@ type tree[R Rule] struct {
 func (t *tree[R]) build(rules ...R) error {
 	for _, r := range sortRule(t.driver, rules) {
 		if err := t.SetRule(r); err != nil {
-			return fmt.Errorf("add rule error: %w", err)
+			return fmt.Errorf("apply rule fail: %w", err)
 		}
 	}
 	return nil
@@ -42,7 +42,7 @@ func (t *tree[R]) Name() string { return t.name }
 // make rule tree grow
 func (t *tree[R]) SetRule(r Rule) error {
 	if level := t.driver.GetLevel(r.Path()); t.level == level { // check if level matched, include root node
-		return t.updateRule(r.Processors()...)
+		return t.apply(r.Processors()...)
 	}
 	return t.getChild(t.driver.GetNameByLevel(r.Path(), t.level+1)).SetRule(r)
 }
@@ -158,10 +158,10 @@ func (t *tree[R]) newSubTree(name string) Tree {
 }
 
 // updateRule parse raw rule Processor to tree node.
-func (t *tree[R]) updateRule(ops ...driver.Processor) error {
-	rule, err := t.driver.CalcRule(t.getRule(), ops...)
+func (t *tree[R]) apply(ops ...driver.Processor) error {
+	rule, err := t.driver.Realize(t.getRule(), ops...)
 	if err != nil {
-		return fmt.Errorf("calculate rule fail: %w", err)
+		return fmt.Errorf("realize rule fail: %w", err)
 	}
 
 	t.ruleMu.Lock()
