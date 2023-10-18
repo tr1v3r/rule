@@ -15,7 +15,7 @@ var _ Driver = (*JSONDriver)(nil)
 func NewJSONDriver() *JSONDriver {
 	return &JSONDriver{
 		PathParser: new(DelimiterPathParser).WithDelimiter("/"),
-		Calculator: new(StdCalculator),
+		Realizer:   new(StdRealizer),
 		Modem: &GeneralModem[*JSONProcessor]{
 			Marshaler:   json.Marshal,
 			Unmarshaler: json.Unmarshal,
@@ -26,7 +26,7 @@ func NewJSONDriver() *JSONDriver {
 // JSONDriver is a driver for JSON type rule tree
 type JSONDriver struct {
 	PathParser
-	Calculator
+	Realizer
 	Modem
 }
 

@@ -1,8 +1,6 @@
 package rule
 
 import (
-	"fmt"
-
 	"github.com/tr1v3r/rule/driver"
 )
 
@@ -35,7 +33,7 @@ func NewTree[R Rule](diver driver.Driver, name, template string, rules ...R) (Tr
 		children: make(map[string]Tree),
 	}
 	if err := tree.build(rules...); err != nil {
-		return nil, fmt.Errorf("build tree by rules fail: %w", err)
+		return nil, err
 	}
 	return tree, nil
 }

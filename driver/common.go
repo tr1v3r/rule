@@ -39,21 +39,21 @@ func (d *DelimiterPathParser) getName(paths []string, index int) string {
 	return paths[index]
 }
 
-var _ Calculator = (*StdCalculator)(nil)
+var _ Realizer = (*StdRealizer)(nil)
 
-// StdCalculator standard rule driver
-type StdCalculator struct{}
+// StdRealizer standard rule driver
+type StdRealizer struct{}
 
-// CalcRule calculate rule
-func (d *StdCalculator) CalcRule(template []byte, ops ...Processor) ([]byte, error) {
+// Realizer calculate rule
+func (r *StdRealizer) Realize(rule []byte, procs ...Processor) ([]byte, error) {
 	var err error
-	for _, op := range ops {
-		if op == nil {
+	for _, proc := range procs {
+		if proc == nil {
 			continue
 		}
-		if template, err = op.Process(template); err != nil {
-			return nil, fmt.Errorf("Process fail: %w", err)
+		if rule, err = proc.Process(rule); err != nil {
+			return nil, fmt.Errorf("do %s on %s fail: %w", proc.Type(), proc.Path(), err)
 		}
 	}
-	return template, nil
+	return rule, nil
 }
