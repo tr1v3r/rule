@@ -31,7 +31,7 @@ var _ Processor = (*YAMLProcessor)(nil)
 
 type YAMLProcessor struct {
 	T string `json:"type"`
-	V string `json:"value"`
+	V []byte `json:"value"`
 }
 
 func (op *YAMLProcessor) Type() string           { return op.T }
@@ -43,14 +43,14 @@ func (op *YAMLProcessor) Save() []byte {
 	data, _ := json.Marshal(op)
 	return data
 }
-func (op *YAMLProcessor) Process(before string) (after string, err error) {
+func (op *YAMLProcessor) Process(before []byte) (after []byte, err error) {
 	// var result any
 	// if err := yaml.Unmarshal([]byte(before), &result); err != nil {
 	// 	return "", fmt.Errorf("unmarshal yaml fail: %w", err)
 	// }
 	switch op.T {
 	case "append":
-		return before + op.T, nil
+		return append(before, op.T...), nil
 	}
 	return before, nil
 }

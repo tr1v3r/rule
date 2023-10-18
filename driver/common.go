@@ -45,14 +45,14 @@ var _ Calculator = (*StdCalculator)(nil)
 type StdCalculator struct{}
 
 // CalcRule calculate rule
-func (d *StdCalculator) CalcRule(template string, ops ...Processor) (string, error) {
+func (d *StdCalculator) CalcRule(template []byte, ops ...Processor) ([]byte, error) {
 	var err error
 	for _, op := range ops {
 		if op == nil {
 			continue
 		}
 		if template, err = op.Process(template); err != nil {
-			return "", fmt.Errorf("Process fail: %w", err)
+			return nil, fmt.Errorf("Process fail: %w", err)
 		}
 	}
 	return template, nil

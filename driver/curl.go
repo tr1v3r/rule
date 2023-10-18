@@ -45,7 +45,7 @@ func (op *CURLProcessor) Save() []byte {
 	data, _ := json.Marshal(op)
 	return data
 }
-func (op *CURLProcessor) Process(_ string) (string, error) {
+func (op *CURLProcessor) Process(_ []byte) ([]byte, error) {
 	method := strings.ToUpper(strings.TrimSpace(op.Method))
 	if method == "" {
 		method = "GET"
@@ -54,7 +54,7 @@ func (op *CURLProcessor) Process(_ string) (string, error) {
 	_, content, _, err := fetch.DoRequestWithOptions(method, op.URL,
 		[]fetch.RequestOption{fetch.WithHeaders(op.Header)}, bytes.NewReader(op.Body))
 	if err != nil {
-		return "", fmt.Errorf("request url %s fail: %w", op.URL, err)
+		return nil, fmt.Errorf("request url %s fail: %w", op.URL, err)
 	}
-	return string(content), nil
+	return content, nil
 }

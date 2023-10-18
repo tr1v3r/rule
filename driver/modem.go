@@ -51,5 +51,8 @@ func (m *GeneralModem[T]) checkType() (reflect.Type, error) {
 	if typ.Kind() == reflect.Interface {
 		return nil, errors.New("cannot be Interface")
 	}
+	if typ.Kind() == reflect.Pointer {
+		typ = typ.Elem()
+	}
 	return typ, nil
 }

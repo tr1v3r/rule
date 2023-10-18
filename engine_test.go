@@ -62,10 +62,10 @@ func TestForest_run(t *testing.T) {
 
 	for _, item := range testcases {
 		rule := f.Get(item.Name).GetRule(item.TargetPath)
-		if rule != item.Expected {
-			t.Errorf("check rule fail, expect: %s\ngot: %s", item.Expected, rule)
+		if string(rule) != item.Expected {
+			t.Errorf("check rule fail, expect: %s\ngot: %s", item.Expected, string(rule))
 		}
-		t.Logf("got rule: %s", rule)
+		t.Logf("got rule: %s", string(rule))
 	}
 }
 
@@ -74,23 +74,23 @@ func InitForest(t *testing.T) Forest {
 		func() Tree {
 			var rules = []*rule{
 				{path: "/", processors: []driver.Processor{
-					&driver.JSONProcessor{T: "create", JSONPath: "author.first", V: "river"},
-					&driver.JSONProcessor{T: "create", JSONPath: "name", V: "root"},
+					&driver.JSONProcessor{T: "create", JSONPath: "author.first", V: []byte("river")},
+					&driver.JSONProcessor{T: "create", JSONPath: "name", V: []byte("root")},
 				}},
 				{path: "/a/b/c/d", processors: []driver.Processor{
-					&driver.JSONProcessor{T: "create", JSONPath: "info.path", V: "path:a/b/c/d"},
+					&driver.JSONProcessor{T: "create", JSONPath: "info.path", V: []byte("path:a/b/c/d")},
 				}},
 				{path: "/a/b/c", processors: []driver.Processor{
-					&driver.JSONProcessor{T: "create", JSONPath: "info.path", V: "path:a/b/c"},
+					&driver.JSONProcessor{T: "create", JSONPath: "info.path", V: []byte("path:a/b/c")},
 				}},
 				{path: "/a/b", processors: []driver.Processor{
-					&driver.JSONProcessor{T: "create", JSONPath: "info.path", V: "path:a/b"},
+					&driver.JSONProcessor{T: "create", JSONPath: "info.path", V: []byte("path:a/b")},
 				}},
 				{path: "/x/y/z", processors: []driver.Processor{
-					&driver.JSONProcessor{T: "create", JSONPath: "info.path", V: "path:x/y/z"},
+					&driver.JSONProcessor{T: "create", JSONPath: "info.path", V: []byte("path:x/y/z")},
 				}},
 				{path: "/a/b/m", processors: []driver.Processor{
-					&driver.JSONProcessor{T: "create", JSONPath: "info.path", V: "path:a/b/m"},
+					&driver.JSONProcessor{T: "create", JSONPath: "info.path", V: []byte("path:a/b/m")},
 				}},
 			}
 			tree, err := NewTree(&struct {
