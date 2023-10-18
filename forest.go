@@ -52,9 +52,10 @@ func (f *forest) RefreshTree(name string) {
 // Build all trees in forest
 func (f *forest) Build() Forest {
 	for _, build := range f.getBuilders() {
-		tree := build()
-		f.Set(tree)
-		f.BindTreeBuilder(tree.Name(), build)
+		if tree := build(); tree != nil {
+			f.Set(tree)
+			f.BindTreeBuilder(tree.Name(), build)
+		}
 	}
 	return f
 }
