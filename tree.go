@@ -20,7 +20,7 @@ type tree[R Rule] struct {
 	// current node rule
 	ruleMu sync.RWMutex
 	rule   string
-	ops    []driver.Operator
+	ops    []driver.Processor
 
 	// for subtree
 	driver driver.Driver
@@ -42,7 +42,7 @@ func (t *tree[R]) Name() string { return t.name }
 // make rule tree grow
 func (t *tree[R]) SetRule(r Rule) error {
 	if level := t.driver.GetLevel(r.Path()); t.level == level { // check if level matched, include root node
-		return t.updateRule(r.Operators()...)
+		return t.updateRule(r.Processors()...)
 	}
 	return t.getChild(t.driver.GetNameByLevel(r.Path(), t.level+1)).SetRule(r)
 }
@@ -94,8 +94,8 @@ func (t *tree[R]) ShowStruct() json.RawMessage {
 	return d
 }
 
-// GetOperators get all Operators.
-func (t *tree[R]) GetOperators() []driver.Operator { return t.ops }
+// GetProcessors get all processors.
+func (t *tree[R]) GetProcessors() []driver.Processor { return t.ops }
 
 // deleteNode delete a node from tree.
 func (t *tree[R]) deleteNode(name string) error {
@@ -157,8 +157,8 @@ func (t *tree[R]) newSubTree(name string) Tree {
 	}
 }
 
-// updateRule parse raw rule Operator to tree node.
-func (t *tree[R]) updateRule(ops ...driver.Operator) error {
+// updateRule parse raw rule Processor to tree node.
+func (t *tree[R]) updateRule(ops ...driver.Processor) error {
 	rule, err := t.driver.CalcRule(t.getRule(), ops...)
 	if err != nil {
 		return fmt.Errorf("calculate rule fail: %w", err)

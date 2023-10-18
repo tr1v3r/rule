@@ -10,11 +10,11 @@ import (
 	"github.com/tr1v3r/pkg/fetch"
 )
 
-var _ Operator = (*CURLOperator)(nil)
+var _ Processor = (*CURLProcessor)(nil)
 
-// CURLOperator
-type CURLOperator struct {
-	// P is the target path of the operator
+// CURLProcessor
+type CURLProcessor struct {
+	// P is the target path of the Processor
 	P string `json:"path,omitempty"`
 
 	// URL the target url
@@ -25,27 +25,27 @@ type CURLOperator struct {
 	Body   []byte              `json:"body,omitempty"`
 	Header map[string][]string `json:"header,omitempty"`
 
-	// A is the author of the operator
+	// A is the author of the Processor
 	A string `json:"author"`
-	// C is the create time of the operator
+	// C is the create time of the Processor
 	C time.Time `json:"created_at"`
 }
 
-func (op *CURLOperator) Type() string         { return "curl" }
-func (op *CURLOperator) Path() string         { return op.P }
-func (op *CURLOperator) Author() string       { return op.A }
-func (op *CURLOperator) CreatedAt() time.Time { return op.C }
-func (op *CURLOperator) Load(data []byte) error {
+func (op *CURLProcessor) Type() string         { return "curl" }
+func (op *CURLProcessor) Path() string         { return op.P }
+func (op *CURLProcessor) Author() string       { return op.A }
+func (op *CURLProcessor) CreatedAt() time.Time { return op.C }
+func (op *CURLProcessor) Load(data []byte) error {
 	if err := json.Unmarshal(data, op); err != nil {
 		return fmt.Errorf("unmarshal fail: %w", err)
 	}
 	return nil
 }
-func (op *CURLOperator) Save() []byte {
+func (op *CURLProcessor) Save() []byte {
 	data, _ := json.Marshal(op)
 	return data
 }
-func (op *CURLOperator) Operate(_ string) (string, error) {
+func (op *CURLProcessor) Process(_ string) (string, error) {
 	method := strings.ToUpper(strings.TrimSpace(op.Method))
 	if method == "" {
 		method = "GET"

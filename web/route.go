@@ -30,7 +30,7 @@ func RegisterApi(r *gin.RouterGroup) {
 			m.POST("node", Ping)
 			// replace template
 			m.POST("template", Ping)
-			// check operates on node
+			// check Processs on node
 			m.POST("check", Ping)
 		}
 	}

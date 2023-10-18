@@ -9,7 +9,7 @@ import (
 )
 
 func TestBuildTree_curl_single(t *testing.T) {
-	tree, err := rule.NewYAMLTree("qq", "", rule.NewRule("/", &driver.CURLOperator{URL: "https://qq.com"}))
+	tree, err := rule.NewYAMLTree("qq", "", rule.NewRule("/", &driver.CURLProcessor{URL: "https://qq.com"}))
 	if err != nil {
 		t.Errorf("build tree fail: %s", err)
 	}
@@ -18,7 +18,7 @@ func TestBuildTree_curl_single(t *testing.T) {
 
 func TestBuildForest_curl_tree(t *testing.T) {
 	f := rule.NewForest(func() rule.Tree {
-		tree, err := rule.NewYAMLTree("qq", "", rule.NewRule("/", &driver.CURLOperator{URL: "https://qq.com"}))
+		tree, err := rule.NewYAMLTree("qq", "", rule.NewRule("/", &driver.CURLProcessor{URL: "https://qq.com"}))
 		if err != nil {
 			t.Errorf("build tree fail: %s", err)
 			return nil
@@ -31,7 +31,7 @@ func TestBuildForest_curl_tree(t *testing.T) {
 
 func TestBuildForest_stream(t *testing.T) {
 	trees := stream.SliceOf("https://qq.com", "https://163.com").Parallel(64).Convert(func(url string) any {
-		tree, _ := rule.NewYAMLTree("url", "", rule.NewRule("/", &driver.CURLOperator{URL: url}))
+		tree, _ := rule.NewYAMLTree("url", "", rule.NewRule("/", &driver.CURLProcessor{URL: url}))
 		return tree
 	}).Collect(func(trees ...any) any {
 		var treesArray []rule.Tree

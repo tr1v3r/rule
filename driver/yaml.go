@@ -11,7 +11,7 @@ func NewYAMLDriver() *YAMLDriver {
 	return &YAMLDriver{
 		PathParser: new(DelimiterPathParser).WithDelimiter("/"),
 		Calculator: new(StdCalculator),
-		Modem: &GeneralModem[*YAMLOperator]{
+		Modem: &GeneralModem[*YAMLProcessor]{
 			Marshaler:   json.Marshal,
 			Unmarshaler: json.Unmarshal,
 		},
@@ -27,23 +27,23 @@ type YAMLDriver struct {
 
 func (YAMLDriver) Name() string { return "yaml" }
 
-var _ Operator = (*YAMLOperator)(nil)
+var _ Processor = (*YAMLProcessor)(nil)
 
-type YAMLOperator struct {
+type YAMLProcessor struct {
 	T string `json:"type"`
 	V string `json:"value"`
 }
 
-func (op *YAMLOperator) Type() string           { return op.T }
-func (op *YAMLOperator) Path() string           { return "" }
-func (op *YAMLOperator) Author() string         { return "" }
-func (op *YAMLOperator) CreatedAt() time.Time   { return time.Now() }
-func (op *YAMLOperator) Load(data []byte) error { return json.Unmarshal(data, op) }
-func (op *YAMLOperator) Save() []byte {
+func (op *YAMLProcessor) Type() string           { return op.T }
+func (op *YAMLProcessor) Path() string           { return "" }
+func (op *YAMLProcessor) Author() string         { return "" }
+func (op *YAMLProcessor) CreatedAt() time.Time   { return time.Now() }
+func (op *YAMLProcessor) Load(data []byte) error { return json.Unmarshal(data, op) }
+func (op *YAMLProcessor) Save() []byte {
 	data, _ := json.Marshal(op)
 	return data
 }
-func (op *YAMLOperator) Operate(before string) (after string, err error) {
+func (op *YAMLProcessor) Process(before string) (after string, err error) {
 	// var result any
 	// if err := yaml.Unmarshal([]byte(before), &result); err != nil {
 	// 	return "", fmt.Errorf("unmarshal yaml fail: %w", err)
