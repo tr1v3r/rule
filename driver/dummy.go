@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-// var _ Driver = (*DummyDriver)(nil)
+var _ Driver = (*DummyDriver)(nil)
 
 // NewDummyDriver ...
 func NewDummyDriver() *DummyDriver {
