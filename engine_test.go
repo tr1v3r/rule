@@ -25,11 +25,11 @@ func TestBuildTree(t *testing.T) {
 
 	for index, item := range testcases {
 		tree, err := NewTree(&struct {
+			driver.Modem
 			driver.PathParser
 			driver.StdCalculator
-			driver.DummyOperatorModem
 			driver.DummyDriver // just provide a method Name
-		}{PathParser: driver.SlashPathParser},
+		}{Modem: driver.DummyModem, PathParser: driver.SlashPathParser},
 			"unit_test_"+fmt.Sprint(index), "{}", item.Rules...)
 		if err != nil {
 			t.Errorf("build tree fail: %s", err)
@@ -94,11 +94,11 @@ func InitForest(t *testing.T) Forest {
 				}},
 			}
 			tree, err := NewTree(&struct {
+				driver.Modem
 				driver.PathParser
 				driver.StdCalculator
-				driver.DummyOperatorModem
 				driver.DummyDriver // just provide a method Name
-			}{PathParser: driver.SlashPathParser},
+			}{Modem: driver.DummyModem, PathParser: driver.SlashPathParser},
 				"json_tree_1", `{"id":1}`, rules...)
 			if err != nil {
 				t.Errorf("build tree fail: %s", err)
@@ -115,11 +115,11 @@ func InitForest(t *testing.T) Forest {
 				{path: "/a/b/m", operators: nil},
 			}
 			tree, err := NewTree(&struct {
+				driver.Modem
 				driver.PathParser
 				driver.StdCalculator
-				driver.DummyOperatorModem
 				driver.DummyDriver // just provide a method Name
-			}{PathParser: driver.SlashPathParser},
+			}{Modem: driver.DummyModem, PathParser: driver.SlashPathParser},
 				"json_tree_2", `{"id":2}`, rules...)
 			if err != nil {
 				t.Errorf("build tree fail: %s", err)

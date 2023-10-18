@@ -6,12 +6,17 @@ import (
 
 var _ Driver = (*DummyDriver)(nil)
 
+var DummyModem = &GeneralModem[Operator]{
+	Marshaler:   func(any) ([]byte, error) { return nil, nil },
+	Unmarshaler: func([]byte, any) error { return nil },
+}
+
 // NewDummyDriver ...
 func NewDummyDriver() *DummyDriver {
 	return &DummyDriver{
 		PathParser: new(DelimiterPathParser).WithDelimiter("/"),
 		Calculator: new(StdCalculator),
-		Modem:      new(DummyOperatorModem),
+		Modem:      DummyModem,
 	}
 }
 
@@ -23,11 +28,6 @@ type DummyDriver struct {
 }
 
 func (DummyDriver) Name() string { return "dummy" }
-
-type DummyOperatorModem struct{}
-
-func (d *DummyOperatorModem) Marshal(ops ...Operator) ([]byte, error)   { return nil, nil }
-func (d *DummyOperatorModem) Unmarshal(data []byte) ([]Operator, error) { return nil, nil }
 
 var _ Operator = (*DummyOperator)(nil)
 

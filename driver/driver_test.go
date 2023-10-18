@@ -89,19 +89,17 @@ func TestJSONDriver(t *testing.T) {
 	t.Logf("got result: %s", rule)
 }
 
-func TestYAMLDriver(t *testing.T) {
+func TestYAMLOperator(t *testing.T) {
 	var rule string
 
-	f, err := os.ReadFile("/tmp/clash.yml")
+	f, err := os.ReadFile("/tmp/rule.yml")
 	if err != nil {
 		t.Errorf("read file fail: %s", err)
 		return
 	}
 	rule = string(f)
 
-	d := driver.NewYAMLDriver()
-
-	data, err := d.Marshal([]driver.Operator{
+	var ops = []driver.Operator{
 		&driver.RawOperator{Proc: func(before string) (string, error) {
 			var result any
 			if err := yaml.Unmarshal([]byte(before), &result); err != nil {
@@ -111,15 +109,6 @@ func TestYAMLDriver(t *testing.T) {
 			newData, err := yaml.Marshal(result)
 			return string(newData), err
 		}},
-	}...)
-	if err != nil {
-		t.Errorf("marshal fail: %s", err)
-		return
-	}
-	ops, err := d.Unmarshal(data)
-	if err != nil {
-		t.Errorf("unmarshal fail: %s", err)
-		return
 	}
 	for _, op := range ops {
 		rule, err = op.Operate(rule)
