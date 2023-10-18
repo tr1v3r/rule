@@ -14,7 +14,6 @@ import (
 
 const treeName = "default"
 
-
 var f rule.Forest
 
 func Serve(timeout time.Duration, handler http.Handler) {
@@ -54,7 +53,7 @@ func RefreshForest() { f = f.Build() }
 
 func DefaultBuilder(rules ...rule.Rule) rule.TreeBuilder {
 	return func() rule.Tree {
-		tree, err := rule.NewTree(&webDriver{PathParser: driver.SlashPathParser},
+		tree, err := rule.NewTree(&webDriver{PathParser: driver.SlashPathParser, Modem: driver.DummyModem},
 			treeName, `{}`, rules...)
 		if err != nil {
 			panic(fmt.Errorf("build new tree fail: %w", err))
@@ -64,10 +63,10 @@ func DefaultBuilder(rules ...rule.Rule) rule.TreeBuilder {
 }
 
 type webDriver struct {
+	driver.Modem
 	driver.PathParser
 
 	driver.StdCalculator
-	driver.DummyOperatorModem
 }
 
 func (webDriver) Name() string { return "default" }

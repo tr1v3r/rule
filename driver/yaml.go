@@ -2,7 +2,6 @@ package driver
 
 import (
 	"encoding/json"
-	"fmt"
 	"time"
 )
 
@@ -12,7 +11,10 @@ func NewYAMLDriver() *YAMLDriver {
 	return &YAMLDriver{
 		PathParser: new(DelimiterPathParser).WithDelimiter("/"),
 		Calculator: new(StdCalculator),
-		Modem:      new(YAMLOperatorModem),
+		Modem: &GeneralModem[*YAMLOperator]{
+			Marshaler:   json.Marshal,
+			Unmarshaler: json.Unmarshal,
+		},
 	}
 }
 
@@ -51,33 +53,4 @@ func (op *YAMLOperator) Operate(before string) (after string, err error) {
 		return before + op.T, nil
 	}
 	return before, nil
-}
-
-var _ Modem = (*YAMLOperatorModem)(nil)
-
-// YAMLOperatorModem operator driver for yaml
-type YAMLOperatorModem struct{}
-
-func (d *YAMLOperatorModem) Marshal(ops ...Operator) ([]byte, error) {
-	var buf = make([][]byte, 0, len(ops))
-	for _, op := range ops {
-		buf = append(buf, op.Save())
-	}
-	return json.Marshal(buf)
-}
-func (d *YAMLOperatorModem) Unmarshal(data []byte) ([]Operator, error) {
-	var buf = make([][]byte, 0, 8)
-	if err := json.Unmarshal(data, &buf); err != nil {
-		return nil, fmt.Errorf("unmarshal fail: %w", err)
-	}
-
-	var ops = make([]Operator, 0, len(buf))
-	for _, item := range buf {
-		op := new(YAMLOperator)
-		if err := op.Load(item); err != nil {
-			return nil, fmt.Errorf("load data fail: %w", err)
-		}
-		ops = append(ops, op)
-	}
-	return ops, nil
 }

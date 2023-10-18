@@ -16,7 +16,10 @@ func NewJSONDriver() *JSONDriver {
 	return &JSONDriver{
 		PathParser: new(DelimiterPathParser).WithDelimiter("/"),
 		Calculator: new(StdCalculator),
-		Modem:      new(JSONModem),
+		Modem: &GeneralModem[*JSONOperator]{
+			Marshaler:   json.Marshal,
+			Unmarshaler: json.Unmarshal,
+		},
 	}
 }
 
@@ -29,35 +32,6 @@ type JSONDriver struct {
 
 // Name return driver name
 func (JSONDriver) Name() string { return "json" }
-
-var _ Modem = (*JSONModem)(nil)
-
-// JSONModem modem for json operator
-type JSONModem struct{}
-
-func (d *JSONModem) Marshal(ops ...Operator) ([]byte, error) {
-	var buf = make([]json.RawMessage, 0, len(ops))
-	for _, op := range ops {
-		buf = append(buf, op.Save())
-	}
-	return json.Marshal(buf)
-}
-func (d *JSONModem) Unmarshal(data []byte) ([]Operator, error) {
-	var buf = make([]json.RawMessage, 0, 8)
-	if err := json.Unmarshal(data, &buf); err != nil {
-		return nil, fmt.Errorf("unmarshal fail: %w", err)
-	}
-
-	var ops = make([]Operator, 0, len(buf))
-	for _, item := range buf {
-		op := new(JSONOperator)
-		if err := op.Load(item); err != nil {
-			return nil, fmt.Errorf("load data fail: %w", err)
-		}
-		ops = append(ops, op)
-	}
-	return ops, nil
-}
 
 var _ Operator = (*JSONOperator)(nil)
 
