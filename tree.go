@@ -220,7 +220,7 @@ func (t *tree[R]) get() (rule []byte) {
 func (t *tree[R]) needRealize() bool {
 	t.procMu.RLock()
 	defer t.procMu.RUnlock()
-	return t.realized
+	return !t.realized
 }
 
 // byLevel sort rules by path level
