@@ -18,6 +18,8 @@ type PathParser interface {
 	// GetNameByLevel get node name from path by level
 	// return empty string if level is out of range
 	GetNameByLevel(path string, level int) (name string)
+	// AppendPath append path
+	AppendPath(path, name string) (newPath string)
 }
 
 // Realizer realize rule
