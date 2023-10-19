@@ -1,6 +1,7 @@
 package web
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -30,6 +31,12 @@ func GetRule(c *gin.Context) {
 	name := c.Query("name")
 	path := c.Query("path")
 
-	rule := f.Get(name).GetRule(path)
+	rule, err := f.Get(name).Get(path)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"msg": fmt.Sprintf("query %s on %s fail: %s", path, name, err),
+		})
+
+	}
 	c.JSON(http.StatusOK, rule)
 }

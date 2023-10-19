@@ -13,7 +13,8 @@ func TestBuildTree_curl_single(t *testing.T) {
 	if err != nil {
 		t.Errorf("build tree fail: %s", err)
 	}
-	t.Logf("get rule by curl: %s", tree.GetRule(""))
+	rule, _ := tree.Get("")
+	t.Logf("get rule by curl: %s", rule)
 }
 
 func TestBuildForest_curl_tree(t *testing.T) {
@@ -23,10 +24,12 @@ func TestBuildForest_curl_tree(t *testing.T) {
 			t.Errorf("build tree fail: %s", err)
 			return nil
 		}
-		t.Logf("get rule by curl: %s", tree.GetRule(""))
+		rule, _ := tree.Get("")
+		t.Logf("get rule by curl: %s", rule)
 		return tree
 	})
-	t.Logf("get rule from forest: %s", f.Get("qq").GetRule("/"))
+	rule, _ := f.Get("qq").Get("/")
+	t.Logf("get rule from forest: %s", rule)
 }
 
 func TestBuildForest_stream(t *testing.T) {
@@ -42,6 +45,7 @@ func TestBuildForest_stream(t *testing.T) {
 	}).([]rule.Tree)
 
 	for i, tree := range trees {
-		t.Logf("got tree [%d] %s: %s", i, tree.Name(), tree.GetRule(""))
+		rule, _ := tree.Get("")
+		t.Logf("got tree [%d] %s: %s", i, tree.Name(), rule)
 	}
 }

@@ -13,6 +13,7 @@ var _ Tree = (*tree[Rule])(nil)
 // tree is a rule tree structure.
 type tree[R Rule] struct {
 	name string // node name
+	path string // nod path
 
 	mu       sync.RWMutex
 	children map[string]Tree
@@ -20,16 +21,29 @@ type tree[R Rule] struct {
 	// current node rule
 	ruleMu sync.RWMutex
 	rule   []byte
-	ops    []driver.Processor
+
+	// procs processor array
+	// only set when tree build, only concurrent reads, so mutex is verbose
+	procs []driver.Processor
 
 	// for subtree
 	driver driver.Driver
 	level  int
+
+	lazyMode bool
+
+	procMu   sync.RWMutex
+	realized bool
+}
+
+func (t *tree[R]) lazy() *tree[R] {
+	t.lazyMode = true
+	return t
 }
 
 func (t *tree[R]) build(rules ...R) error {
-	for _, r := range sortRule(t.driver, rules) {
-		if err := t.SetRule(r); err != nil {
+	for _, r := range byLevel(t.driver, rules) {
+		if err := t.Set(r); err != nil {
 			return fmt.Errorf("apply rule fail: %w", err)
 		}
 	}
@@ -37,55 +51,64 @@ func (t *tree[R]) build(rules ...R) error {
 }
 
 func (t *tree[R]) Name() string { return t.name }
+func (t *tree[R]) Path() string { return t.path }
 
-// SetRule add a rule node to tree or update rule node.
-// make rule tree grow
-func (t *tree[R]) SetRule(r Rule) error {
+func (t *tree[R]) Set(r Rule) error {
 	if level := t.driver.GetLevel(r.Path()); t.level == level { // check if level matched, include root node
 		return t.apply(r.Processors()...)
 	}
-	return t.getChild(t.driver.GetNameByLevel(r.Path(), t.level+1)).SetRule(r)
+	return t.getChild(t.driver.GetNameByLevel(r.Path(), t.level+1)).Set(r)
 }
 
-// GetRule get a rule from tree.
-func (t *tree[R]) GetRule(path string) []byte {
+func (t *tree[R]) Get(path string) ([]byte, error) {
 	if t == nil {
-		return nil
+		return nil, ErrNilTree
 	}
 
-	if subTree := t.pickChild(t.driver.GetNameByLevel(path, t.level+1)); subTree != nil {
-		return subTree.GetRule(path)
+	if t.lazyMode && t.needRealize() {
+		if err := t.realize(t.procs); err != nil {
+			return nil, fmt.Errorf("realize rule on %s fail: %w", t.Path(), err)
+		}
 	}
-	return t.getRule()
+
+	if child := t.pickChild(t.driver.GetNameByLevel(path, t.level+1)); child != nil {
+		if t.lazyMode {
+			if tree, ok := child.(*tree[R]); ok && tree.needRealize() {
+				tree.set(t.get())
+			}
+		}
+		return child.Get(path)
+	}
+	return t.get(), nil
 }
 
-// HasNode check if has node in path
-func (t *tree[R]) HasNode(path string) bool {
+// Has check if has node in path
+func (t *tree[R]) Has(path string) bool {
 	if t.driver.GetLevel(path) == t.level { // check level
 		return t.Name() == t.driver.GetNameByLevel(path, t.level)
 	}
 	if tree := t.pickChild(t.driver.GetNameByLevel(path, t.level+1)); tree != nil {
-		return tree.HasNode(path)
+		return tree.Has(path)
 	}
 	return false
 }
 
-// DelNode delete a node from tree.
-func (t *tree[R]) DelNode(path string) error {
+// Del delete a node from tree.
+func (t *tree[R]) Del(path string) error {
 	if level := t.driver.GetLevel(path); level == 0 {
 		return fmt.Errorf("root node can not be deleted")
 	} else if t.level+1 == level {
 		return t.deleteNode(t.driver.GetNameByLevel(path, level))
 	}
 
-	if subTree := t.pickChild(t.driver.GetNameByLevel(path, t.level+1)); subTree != nil {
-		return subTree.DelNode(path)
+	if child := t.pickChild(t.driver.GetNameByLevel(path, t.level+1)); child != nil {
+		return child.Del(path)
 	}
 	return nil
 }
 
 // ShowStruct return tree struct.
-func (t *tree[R]) ShowStruct() json.RawMessage {
+func (t *tree[R]) ShowStruct() []byte {
 	m := make(map[string]json.RawMessage)
 	for _, v := range t.getChildren() {
 		m[v.Name()] = v.ShowStruct()
@@ -93,9 +116,6 @@ func (t *tree[R]) ShowStruct() json.RawMessage {
 	d, _ := json.Marshal(m)
 	return d
 }
-
-// GetProcessors get all processors.
-func (t *tree[R]) GetProcessors() []driver.Processor { return t.ops }
 
 // deleteNode delete a node from tree.
 func (t *tree[R]) deleteNode(name string) error {
@@ -113,7 +133,7 @@ func (t *tree[R]) getChild(name string) (tree Tree) {
 		return tree
 	}
 	tree = t.newSubTree(name)
-	t.graft(tree)
+	t.Graft(tree)
 	return tree
 }
 
@@ -134,13 +154,11 @@ func (t *tree[R]) pickChild(name string) Tree {
 	return t.children[name]
 }
 
-// graft add a child tree on current node
-func (t *tree[R]) graft(subTree Tree) Tree {
+// Graft graft a sub tree
+func (t *tree[R]) Graft(child Tree) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
-	t.children[subTree.Name()] = subTree
-
-	return t
+	t.children[child.Name()] = child
 }
 
 // newSubTree create a new sub tree.
@@ -148,39 +166,65 @@ func (t *tree[R]) graft(subTree Tree) Tree {
 func (t *tree[R]) newSubTree(name string) Tree {
 	return &tree[R]{
 		name: name,
+		path: t.driver.AppendPath(t.path, name),
 
-		driver: t.driver,
+		driver:   t.driver,
+		lazyMode: t.lazyMode,
 
 		level:    t.level + 1,
-		rule:     t.getRule(),
+		rule:     t.get(),
 		children: make(map[string]Tree),
 	}
 }
 
 // updateRule parse raw rule Processor to tree node.
-func (t *tree[R]) apply(ops ...driver.Processor) error {
-	rule, err := t.driver.Realize(t.getRule(), ops...)
+func (t *tree[R]) apply(procs ...driver.Processor) error {
+	t.procs = procs
+
+	if t.lazyMode {
+		return nil
+	}
+	return t.realize(procs)
+}
+
+func (t *tree[R]) realize(procs []driver.Processor) error {
+	t.procMu.Lock()
+	defer t.procMu.Unlock()
+	if t.realized {
+		return nil
+	}
+
+	rule, err := t.driver.Realize(t.get(), procs...)
 	if err != nil {
 		return fmt.Errorf("realize rule fail: %w", err)
 	}
+	t.set(rule)
 
-	t.ruleMu.Lock()
-	defer t.ruleMu.Unlock()
-	t.rule = rule
-	t.ops = append(t.ops, ops...)
-
+	t.realized = true
 	return nil
 }
 
-// getRule return current node rule.
-func (t *tree[R]) getRule() []byte {
+func (t *tree[R]) set(rule []byte) {
+	t.ruleMu.Lock()
+	defer t.ruleMu.Unlock()
+	t.rule = rule
+}
+
+// get return current node rule.
+func (t *tree[R]) get() (rule []byte) {
 	t.ruleMu.RLock()
 	defer t.ruleMu.RUnlock()
 	return t.rule
 }
 
-// sortRule sort rules by path.
-func sortRule[R Rule](driver driver.Driver, rules []R) []R {
+func (t *tree[R]) needRealize() bool {
+	t.procMu.RLock()
+	defer t.procMu.RUnlock()
+	return t.realized
+}
+
+// byLevel sort rules by path level
+func byLevel[R Rule](driver driver.Driver, rules []R) []R {
 	by[R](func(x, y R) bool { return driver.GetLevel(x.Path()) < driver.GetLevel(y.Path()) }).Sort(rules)
 	return rules
 }

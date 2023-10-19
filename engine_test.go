@@ -61,9 +61,14 @@ func TestForest_run(t *testing.T) {
 	t.Logf("forest info: %s", f.Info())
 
 	for _, item := range testcases {
-		rule := f.Get(item.Name).GetRule(item.TargetPath)
+		rule, err := f.Get(item.Name).Get(item.TargetPath)
+		if err != nil {
+			t.Errorf("query rule %s on %s fail: %s", item.TargetPath, item.Name, err)
+			continue
+		}
 		if string(rule) != item.Expected {
 			t.Errorf("check rule fail, expect: %s\ngot: %s", item.Expected, string(rule))
+			continue
 		}
 		t.Logf("got rule: %s", string(rule))
 	}

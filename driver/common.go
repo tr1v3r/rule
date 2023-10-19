@@ -32,6 +32,7 @@ func (d *DelimiterPathParser) GetNameByLevel(path string, level int) string {
 	}
 	return ""
 }
+func (d *DelimiterPathParser) AppendPath(path, name string) string { return path + d.delimiter + name }
 func (d *DelimiterPathParser) getName(paths []string, index int) string {
 	if index >= len(paths) {
 		return ""

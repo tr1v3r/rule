@@ -1,7 +1,6 @@
 package rule
 
 import (
-	"encoding/json"
 	"time"
 
 	"github.com/tr1v3r/rule/driver"
@@ -28,15 +27,27 @@ type Forest interface {
 
 // Tree rule tree
 type Tree interface {
+	// Name return tree name
 	Name() string
+	// Path return tree path in root tree
+	// return "" when tree is root tree
+	Path() string
 
-	SetRule(Rule) error
-	GetRule(path string) []byte
+	// Set add a rule node to tree or update rule node.
+	Set(Rule) error
+	// Get query rule from tree by path
+	Get(path string) (rule []byte, err error)
 
-	HasNode(path string) bool
-	DelNode(path string) error
-	ShowStruct() json.RawMessage
-	GetProcessors() []driver.Processor
+	// Has check if has tree node for path
+	Has(path string) bool
+	// Del delete tree node in tree
+	Del(path string) error
+
+	// Graft graft a sub tree
+	Graft(Tree)
+
+	// ShowStruct return tree info
+	ShowStruct() []byte
 }
 
 // Rule rule for tree
