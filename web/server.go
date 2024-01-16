@@ -6,8 +6,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/tr1v3r/pkg/guard"
 	"github.com/tr1v3r/pkg/log"
-	"github.com/tr1v3r/pkg/shutdown"
+
 	"github.com/tr1v3r/rule"
 	"github.com/tr1v3r/rule/driver"
 )
@@ -29,7 +30,7 @@ func Serve(timeout time.Duration, handler http.Handler) {
 	}()
 
 	// wati shutdown signal
-	<-shutdown.Cancel()
+	<-guard.Cancel()
 	log.Info("Shutdown Server ...")
 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)

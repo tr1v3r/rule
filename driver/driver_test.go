@@ -6,8 +6,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/tr1v3r/rule/driver"
 	"gopkg.in/yaml.v3"
+
+	"github.com/tr1v3r/rule/driver"
 )
 
 func TestSlashPathParser(t *testing.T) {

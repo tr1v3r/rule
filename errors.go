@@ -1,6 +1,8 @@
 package rule
 
-import "errors"
+import (
+	"errors"
+)
 
 var (
 	// ErrNilTree find nil tree

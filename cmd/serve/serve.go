@@ -2,16 +2,14 @@ package main
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
-
 	swaggerFiles "github.com/swaggo/files"     // swagger embed files
 	ginSwagger "github.com/swaggo/gin-swagger" // gin-swagger middleware
-
 	"github.com/tr1v3r/pkg/log"
+
 	"github.com/tr1v3r/rule"
 	_ "github.com/tr1v3r/rule/docs"
 	"github.com/tr1v3r/rule/driver"
@@ -82,7 +80,7 @@ func load() (rules []rule.Rule) {
 	if filename == "" {
 		filename = defaultFilename
 	}
-	data, err := ioutil.ReadFile(filename)
+	data, err := os.ReadFile(filename)
 	if err != nil {
 		log.Error("read file fail: %s", err)
 		return nil

@@ -3,9 +3,10 @@ package rule_test
 import (
 	"testing"
 
+	"github.com/tr1v3r/stream"
+
 	"github.com/tr1v3r/rule"
 	"github.com/tr1v3r/rule/driver"
-	"github.com/tr1v3r/stream"
 )
 
 func TestBuildTree_curl_single(t *testing.T) {

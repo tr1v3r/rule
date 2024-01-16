@@ -1,6 +1,8 @@
 package driver
 
-import "time"
+import (
+	"time"
+)
 
 // Driver driver interface
 type Driver interface {

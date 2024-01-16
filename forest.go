@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"sync"
 	"time"
+
+	"github.com/tr1v3r/pkg/guard"
+	"github.com/tr1v3r/pkg/log"
 )
 
 var _ Forest = (*forest)(nil)
@@ -116,9 +119,21 @@ func (f *forest) getBuilders() []TreeBuilder {
 	return f.builders
 }
 func (f *forest) appendBuilders(builders ...TreeBuilder) {
+	var wrappedBuilders = make([]TreeBuilder, len(builders))
+	for i, builder := range builders {
+		wrappedBuilders[i] = func() Tree {
+			defer func() {
+				if e := recover(); e != nil {
+					log.Error("build tree panic: %s, stack: %s", e, guard.CatchStack())
+				}
+			}()
+			return builder()
+		}
+	}
+
 	f.bMu.Lock()
 	defer f.bMu.Unlock()
-	f.builders = append(f.builders, builders...)
+	f.builders = append(f.builders, wrappedBuilders...)
 }
 func (f *forest) getBuilder(name string) TreeBuilder {
 	f.bMu.RLock()

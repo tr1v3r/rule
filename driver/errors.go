@@ -1,6 +1,8 @@
 package driver
 
-import "errors"
+import (
+	"errors"
+)
 
 var (
 	// ErrSerializeNotSupport not support serialize error
