@@ -5,6 +5,6 @@ import (
 )
 
 var (
-	// ErrNilTree find nil tree
-	ErrNilTree = errors.New("nil tree")
+	// ErrNotExistsTree tree not exists
+	ErrNotExistsTree = errors.New("tree not exists")
 )

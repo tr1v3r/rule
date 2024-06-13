@@ -21,6 +21,8 @@ type Forest interface {
 
 	Get(name string) Tree
 	Set(tree Tree)
+	// GetVal get value from tree
+	GetVal(treeName, path string) (rule []byte, err error)
 
 	Info() string
 }
