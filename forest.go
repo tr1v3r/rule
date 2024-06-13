@@ -93,6 +93,15 @@ func (f *forest) Set(tree Tree) {
 	f.m[tree.Name()] = tree
 }
 
+// GetVal get value from tree
+func (f *forest) GetVal(treeName, path string) (rule []byte, err error) {
+	tree := f.Get(treeName)
+	if tree == nil {
+		return nil, ErrNotExistsTree
+	}
+	return tree.Get(path)
+}
+
 // Info ...
 func (f *forest) Info() string {
 	return fmt.Sprintf("forest got %d tree: %s", f.count(), f.names())

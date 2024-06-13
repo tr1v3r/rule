@@ -62,7 +62,7 @@ func (t *tree[R]) Set(r Rule) error {
 
 func (t *tree[R]) Get(path string) ([]byte, error) {
 	if t == nil {
-		return nil, ErrNilTree
+		return nil, ErrNotExistsTree
 	}
 
 	if t.lazyMode && t.needRealize() {
