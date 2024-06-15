@@ -42,7 +42,7 @@ func NewTileTree[R Rule](name, template string, rules ...R) (Tree, error) {
 
 // NewLazyTileTree build a tree with tile children in lazy mode
 func NewLazyTileTree[R Rule](name, template string, rules ...R) (Tree, error) {
-	return NewTree[R](driver.NewTileDriver(), name, template, rules...)
+	return NewLazyTree[R](driver.NewTileDriver(), name, template, rules...)
 }
 
 // NewTree build a rule tree.
