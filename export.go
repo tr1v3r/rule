@@ -54,6 +54,8 @@ type Tree interface {
 
 // Rule rule for tree
 type Rule interface {
+	// return path of rule
 	Path() string
+	// return processor on this rule
 	Processors() []driver.Processor
 }

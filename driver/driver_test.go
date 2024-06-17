@@ -120,3 +120,15 @@ func TestYAMLProcessor(t *testing.T) {
 	}
 	t.Logf("got result: %s", rule)
 }
+
+func TestTileDriver(t *testing.T) {
+	var rule []byte
+
+	d := driver.NewTileDriver()
+
+	rule, err := d.Realize(rule, &driver.RawProcessor{Proc: func([]byte) ([]byte, error) { return []byte("abc\ndef"), nil }})
+	if err != nil {
+		t.Errorf("realize fail: %s", rule)
+	}
+	t.Logf("got result: %s", rule)
+}

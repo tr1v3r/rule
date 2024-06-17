@@ -50,3 +50,39 @@ func TestBuildForest_stream(t *testing.T) {
 		t.Logf("got tree [%d] %s: %s", i, tree.Name(), rule)
 	}
 }
+
+func TestTileTree(t *testing.T) {
+	var proc = func(content string) func([]byte) ([]byte, error) {
+		return func([]byte) ([]byte, error) {
+			return []byte(content), nil
+		}
+	}
+
+	// tree, err := rule.NewTileTree("test_tile_tree", "template",
+	tree, err := rule.NewLazyTileTree("test_tile_tree", "template",
+		rule.NewRule("/abc", &driver.RawProcessor{Proc: proc("content1")}),
+		rule.NewRule("/123", &driver.RawProcessor{Proc: proc("content2")}),
+		rule.NewRule("/test", &driver.RawProcessor{Proc: proc("content3")}),
+		rule.NewRule("/@@@", &driver.RawProcessor{Proc: proc("content4")}),
+	)
+	if err != nil {
+		t.Errorf("build tile tree fail: %s", err)
+	}
+
+	var data []byte
+
+	if data, err = tree.Get("/abc"); err != nil {
+		t.Errorf("get /abc fail: %s", err)
+	}
+	if data, err = tree.Get("/123"); err != nil {
+		t.Errorf("get /123 fail: %s", err)
+	}
+	if data, err = tree.Get("/test"); err != nil {
+		t.Errorf("get /test fail: %s", err)
+	}
+	if data, err = tree.Get("/@@@"); err != nil {
+		t.Errorf("get /@@@ fail: %s", err)
+	}
+
+	_ = data
+}
