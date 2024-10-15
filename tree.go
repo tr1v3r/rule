@@ -30,7 +30,21 @@ type tree struct {
 	// only set when tree build, only concurrent reads, so mutex is verbose
 	procs []driver.Processor
 
+	// Lazy Mode:
+	// In Lazy Mode, tree nodes are not created or calculated during initialization.
+	// Only the root node exists initially, and other nodes are dynamically initialized
+	// and calculated when accessed. This mode employs lazy evaluation, saving memory
+	// and computation resources, particularly useful in scenarios where only a subset
+	// of the nodes are accessed.
 	lazyMode bool
+	// Instant Mode:
+	// In Instant Mode, every time a node is accessed, its data is recalculated
+	// and the entire path from the root to the accessed node is refreshed.
+	// Even if the nodes have been previously created or calculated, they are
+	// forcefully recalculated to ensure up-to-date data. This mode emphasizes
+	// real-time computation, ideal for scenarios requiring frequent updates
+	// and data consistency.
+	instantMode bool
 
 	procMu   sync.RWMutex
 	realized bool
@@ -38,6 +52,11 @@ type tree struct {
 
 func (t *tree) lazy() *tree {
 	t.lazyMode = true
+	return t
+}
+
+func (t *tree) instant() *tree {
+	t.instantMode = true
 	return t
 }
 
@@ -171,8 +190,9 @@ func (t *tree) newSubTree(name string) Tree {
 		name: name,
 		path: t.driver.AppendPath(t.path, name),
 
-		driver:   t.driver,
-		lazyMode: t.lazyMode,
+		driver:      t.driver,
+		lazyMode:    t.lazyMode,
+		instantMode: t.instantMode,
 
 		level:    t.level + 1,
 		content:  t.get(),
@@ -192,7 +212,7 @@ func (t *tree) apply(procs ...driver.Processor) error {
 func (t *tree) realize(procs []driver.Processor) error {
 	t.procMu.Lock()
 	defer t.procMu.Unlock()
-	if t.realized {
+	if !t.instantMode && t.realized {
 		return nil
 	}
 
