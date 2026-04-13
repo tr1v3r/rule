@@ -7,6 +7,7 @@ import (
 
 	"github.com/tr1v3r/pkg/guard"
 	"github.com/tr1v3r/pkg/log"
+	"golang.org/x/time/rate"
 )
 
 var _ Forest = (*forest)(nil)
@@ -22,6 +23,9 @@ type forest struct {
 	bMu      sync.RWMutex
 	builders []TreeBuilder
 	builderM map[string]TreeBuilder
+
+	rlMu        sync.RWMutex
+	rateLimiter *rate.Limiter
 }
 
 // Register register tree builder
@@ -99,7 +103,27 @@ func (f *forest) GetVal(treeName, path string) (rule []byte, err error) {
 	if tree == nil {
 		return nil, ErrNotExistsTree
 	}
+
+	if !f.allowGet() {
+		return nil, ErrRateLimited
+	}
+
 	return tree.Get(path)
+}
+
+// allowGet checks if the rate limiter allows this request.
+func (f *forest) allowGet() bool {
+	f.rlMu.RLock()
+	limiter := f.rateLimiter
+	f.rlMu.RUnlock()
+	return limiter == nil || limiter.Allow()
+}
+
+// SetRateLimit sets a global rate limit for all GetVal calls.
+func (f *forest) SetRateLimit(r rate.Limit, burst int) {
+	f.rlMu.Lock()
+	defer f.rlMu.Unlock()
+	f.rateLimiter = rate.NewLimiter(r, burst)
 }
 
 // Info ...
