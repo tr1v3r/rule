@@ -3,6 +3,8 @@ package rule
 import (
 	"time"
 
+	"golang.org/x/time/rate"
+
 	"github.com/tr1v3r/rule/driver"
 )
 
@@ -25,6 +27,9 @@ type Forest interface {
 	GetVal(treeName, path string) (rule []byte, err error)
 
 	Info() string
+
+	// SetRateLimit sets a global rate limit for all GetVal calls as a fallback.
+	SetRateLimit(r rate.Limit, burst int)
 }
 
 // Tree rule tree
@@ -50,6 +55,9 @@ type Tree interface {
 
 	// ShowStruct return tree info
 	ShowStruct() []byte
+
+	// SetRateLimit sets a rate limit for Get calls on this tree.
+	SetRateLimit(r rate.Limit, burst int)
 }
 
 // Rule rule for tree

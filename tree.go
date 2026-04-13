@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"sync"
 
+	"golang.org/x/time/rate"
+
 	"github.com/tr1v3r/rule/driver"
 )
 
@@ -48,6 +50,9 @@ type tree struct {
 
 	procMu   sync.RWMutex
 	realized bool
+
+	rlMu        sync.RWMutex
+	rateLimiter *rate.Limiter
 }
 
 func (t *tree) lazy() *tree {
@@ -72,6 +77,21 @@ func (t *tree) build(rules ...Rule) error {
 func (t *tree) Name() string { return t.name }
 func (t *tree) Path() string { return t.path }
 
+// allowGet checks if the rate limiter allows this request.
+func (t *tree) allowGet() bool {
+	t.rlMu.RLock()
+	limiter := t.rateLimiter
+	t.rlMu.RUnlock()
+	return limiter == nil || limiter.Allow()
+}
+
+// SetRateLimit sets a rate limit for Get calls on this tree.
+func (t *tree) SetRateLimit(r rate.Limit, burst int) {
+	t.rlMu.Lock()
+	defer t.rlMu.Unlock()
+	t.rateLimiter = rate.NewLimiter(r, burst)
+}
+
 func (t *tree) Set(r Rule) error {
 	if level := t.driver.GetLevel(r.Path()); t.level == level { // check if level matched, include root node
 		return t.apply(r.Processors()...)
@@ -82,6 +102,10 @@ func (t *tree) Set(r Rule) error {
 func (t *tree) Get(path string) ([]byte, error) {
 	if t == nil {
 		return nil, ErrNotExistsTree
+	}
+
+	if !t.allowGet() {
+		return nil, ErrRateLimited
 	}
 
 	if err := t.realize(t.procs); err != nil {
