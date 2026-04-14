@@ -158,9 +158,6 @@ func (t *tree) GetWithContext(rc *driver.RuleContext, path string) ([]byte, erro
 		return nil, ErrNotExistsTree
 	}
 
-	if rc != nil {
-		rc.TreePath = t.path
-	}
 	if err := t.realizeWithContext(rc, t.procs); err != nil {
 		return nil, fmt.Errorf("realize rule on %s fail: %w", t.Path(), err)
 	}
