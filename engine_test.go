@@ -144,7 +144,7 @@ func TestLazyCacheTree_TTLExpiry(t *testing.T) {
 
 	// Use a processor that produces different output each time to detect re-realization
 	incrementProcessor := &driver.RawProcessor{
-		Proc: func(before []byte) ([]byte, error) {
+		Proc: func(_ *driver.RuleContext, before []byte) ([]byte, error) {
 			n := atomic.AddInt32(&realizeCount, 1)
 			return fmt.Appendf(nil, `{"realize":%d}`, n), nil
 		},
@@ -230,7 +230,7 @@ func TestRealizeWithContext_Dispatch(t *testing.T) {
 	var gotRC *driver.RuleContext
 
 	proc := &driver.RawProcessor{
-		Proc: func(before []byte) ([]byte, error) {
+		Proc: func(_ *driver.RuleContext, before []byte) ([]byte, error) {
 			return append(before, []byte("_ctx")...), nil
 		},
 	}
@@ -303,7 +303,7 @@ func (p *contextCapturingProcessor) Process(rc *driver.RuleContext, before []byt
 
 func TestRawProcessor_Fallback(t *testing.T) {
 	proc := &driver.RawProcessor{
-		Proc: func(before []byte) ([]byte, error) {
+		Proc: func(_ *driver.RuleContext, before []byte) ([]byte, error) {
 			return []byte("fallback"), nil
 		},
 	}
@@ -335,7 +335,7 @@ func TestTree_Fallback(t *testing.T) {
 	}
 
 	tree.SetFallback(&driver.RawProcessor{
-		Proc: func(before []byte) ([]byte, error) {
+		Proc: func(_ *driver.RuleContext, before []byte) ([]byte, error) {
 			fallbackCalled = true
 			return append(before, []byte(`,"fallback":true}`)...), nil
 		},

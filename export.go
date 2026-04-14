@@ -32,6 +32,9 @@ type Forest interface {
 
 	// SetRateLimit sets a global rate limit for all GetVal calls as a fallback.
 	SetRateLimit(r rate.Limit, burst int)
+
+	// SetDefaultContext sets the default RuleContext on all trees in the forest.
+	SetDefaultContext(rc *driver.RuleContext)
 }
 
 // Tree rule tree
@@ -66,6 +69,10 @@ type Tree interface {
 	// SetFallback sets a processor to handle cases where path resolution
 	// cannot find a matching child node.
 	SetFallback(proc driver.Processor)
+
+	// SetDefaultContext sets the default RuleContext used by realize when
+	// no request-scoped context is provided (e.g. via Get or during build).
+	SetDefaultContext(rc *driver.RuleContext)
 }
 
 // Rule rule for tree

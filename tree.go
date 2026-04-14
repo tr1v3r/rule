@@ -16,7 +16,7 @@ var _ Tree = (*tree)(nil)
 // tree is a rule tree structure.
 type tree struct {
 	name string // node name
-	path string // nod path
+	path string // node path
 
 	mu       sync.RWMutex
 	children map[string]Tree
@@ -61,6 +61,8 @@ type tree struct {
 
 	rlMu        sync.RWMutex
 	rateLimiter *rate.Limiter
+
+	defaultCtx *driver.RuleContext
 }
 
 func (t *tree) lazy() *tree {
@@ -181,9 +183,28 @@ func (t *tree) doFallback(rc *driver.RuleContext, content []byte) ([]byte, error
 }
 
 // SetFallback sets a processor to handle cases where path resolution
-// cannot find a matching child node.
+// cannot find a matching child node, and propagates it to all subtrees.
 func (t *tree) SetFallback(proc driver.Processor) {
 	t.fallback = proc
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+	for _, child := range t.children {
+		if ct, ok := child.(*tree); ok {
+			ct.SetFallback(proc)
+		}
+	}
+}
+
+// SetDefaultContext sets the default RuleContext for this tree and all subtrees.
+func (t *tree) SetDefaultContext(rc *driver.RuleContext) {
+	t.defaultCtx = rc
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+	for _, child := range t.children {
+		if ct, ok := child.(*tree); ok {
+			ct.SetDefaultContext(rc)
+		}
+	}
 }
 
 // inherit set content by parent's content after check mode and realization
@@ -279,6 +300,9 @@ func (t *tree) newSubTree(name string) Tree {
 		name: name,
 		path: t.driver.AppendPath(t.path, name),
 
+		defaultCtx: t.defaultCtx,
+		fallback:   t.fallback,
+
 		driver:      t.driver,
 		lazyMode:    t.lazyMode,
 		instantMode: t.instantMode,
@@ -300,10 +324,13 @@ func (t *tree) apply(procs ...driver.Processor) error {
 }
 
 func (t *tree) realize(procs []driver.Processor) error {
-	return t.realizeWithContext(nil, procs)
+	return t.realizeWithContext(t.defaultCtx, procs)
 }
 
 func (t *tree) realizeWithContext(rc *driver.RuleContext, procs []driver.Processor) error {
+	if rc == nil {
+		rc = t.defaultCtx
+	}
 	// Fast path: read lock 检查是否可以跳过 realization
 	t.realizeMu.RLock()
 	if !t.instantMode && !t.realizedAt.IsZero() && (t.cacheTTL == 0 || time.Since(t.realizedAt) < t.cacheTTL) {

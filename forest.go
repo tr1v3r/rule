@@ -142,6 +142,15 @@ func (f *forest) SetRateLimit(r rate.Limit, burst int) {
 	f.rateLimiter = rate.NewLimiter(r, burst)
 }
 
+// SetDefaultContext sets the default RuleContext on all trees in the forest.
+func (f *forest) SetDefaultContext(rc *driver.RuleContext) {
+	f.mu.RLock()
+	defer f.mu.RUnlock()
+	for _, t := range f.m {
+		t.SetDefaultContext(rc)
+	}
+}
+
 // Info ...
 func (f *forest) Info() string {
 	return fmt.Sprintf("forest got %d tree: %s", f.count(), f.names())

@@ -52,8 +52,8 @@ func TestBuildForest_stream(t *testing.T) {
 }
 
 func TestTileTree(t *testing.T) {
-	var proc = func(content string) func([]byte) ([]byte, error) {
-		return func([]byte) ([]byte, error) {
+	var proc = func(content string) func(*driver.RuleContext, []byte) ([]byte, error) {
+		return func(_ *driver.RuleContext, _ []byte) ([]byte, error) {
 			return []byte(content), nil
 		}
 	}

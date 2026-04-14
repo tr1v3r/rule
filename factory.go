@@ -1,6 +1,7 @@
 package rule
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -140,6 +141,8 @@ func NewLazyCacheTree[R Rule](driver driver.Driver, name, template string, ttl t
 func newTree[R Rule](diver driver.Driver, name, template string) *tree {
 	return &tree{
 		name: name,
+
+		defaultCtx: &driver.RuleContext{Context: context.Background()},
 
 		content:  []byte(template),
 		driver:   diver,
