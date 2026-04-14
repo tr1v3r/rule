@@ -3,7 +3,9 @@ package rule
 import (
 	"encoding/json"
 	"fmt"
+	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/tr1v3r/rule/driver"
 )
@@ -134,4 +136,91 @@ func InitForest(t *testing.T) Forest {
 		},
 	}
 	return NewForest(builders...)
+}
+
+func TestLazyCacheTree_TTLExpiry(t *testing.T) {
+	var realizeCount int32
+
+	// Use a processor that produces different output each time to detect re-realization
+	incrementProcessor := &driver.RawProcessor{
+		Proc: func(before []byte) ([]byte, error) {
+			n := atomic.AddInt32(&realizeCount, 1)
+			return fmt.Appendf(nil, `{"realize":%d}`, n), nil
+		},
+	}
+
+	tree, err := NewLazyCacheTree(
+		&struct {
+			driver.Modem
+			driver.PathParser
+			driver.StdRealizer
+			driver.DummyDriver
+		}{Modem: driver.DummyModem, PathParser: driver.SlashPathParser},
+		"cache_test", `{}`, 50*time.Millisecond,
+		NewRule("/", incrementProcessor),
+	)
+	if err != nil {
+		t.Fatalf("build tree fail: %s", err)
+	}
+
+	// First Get — triggers realization
+	result1, err := tree.Get("/")
+	if err != nil {
+		t.Fatalf("first get fail: %s", err)
+	}
+	if atomic.LoadInt32(&realizeCount) != 1 {
+		t.Fatalf("expected realizeCount=1, got %d", realizeCount)
+	}
+
+	// Second Get immediately — should use cache
+	result2, err := tree.Get("/")
+	if err != nil {
+		t.Fatalf("second get fail: %s", err)
+	}
+	if string(result1) != string(result2) {
+		t.Errorf("cache miss on immediate second get: %s vs %s", result1, result2)
+	}
+	if atomic.LoadInt32(&realizeCount) != 1 {
+		t.Errorf("expected realizeCount=1 (cached), got %d", realizeCount)
+	}
+
+	// Wait for TTL to expire
+	time.Sleep(60 * time.Millisecond)
+
+	// Third Get — should re-realize with different result
+	result3, err := tree.Get("/")
+	if err != nil {
+		t.Fatalf("third get fail: %s", err)
+	}
+	if atomic.LoadInt32(&realizeCount) != 2 {
+		t.Errorf("expected realizeCount=2 (re-realized), got %d", realizeCount)
+	}
+	if string(result3) == string(result1) {
+		t.Errorf("expected different result after TTL expiry")
+	}
+	t.Logf("cached: %s, after TTL: %s", result1, result3)
+}
+
+func TestLazyCacheTree_ZeroTTL(t *testing.T) {
+	// Zero TTL should behave like standard lazy — cache forever
+	tree, err := NewLazyCacheTree(
+		&struct {
+			driver.Modem
+			driver.PathParser
+			driver.StdRealizer
+			driver.DummyDriver
+		}{Modem: driver.DummyModem, PathParser: driver.SlashPathParser},
+		"zero_ttl_test", `{"v":0}`, 0,
+		NewRule("/", &driver.JSONProcessor{T: "create", JSONPath: "v", V: []byte("1")}),
+	)
+	if err != nil {
+		t.Fatalf("build tree fail: %s", err)
+	}
+
+	result1, _ := tree.Get("/")
+	time.Sleep(20 * time.Millisecond)
+	result2, _ := tree.Get("/")
+	if string(result1) != string(result2) {
+		t.Errorf("zero TTL should cache forever, got different results: %s vs %s", result1, result2)
+	}
 }

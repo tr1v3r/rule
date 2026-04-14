@@ -2,6 +2,7 @@ package rule
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/tr1v3r/rule/driver"
 )
@@ -30,6 +31,11 @@ func NewLazyInstantJSONTree[R Rule](name, template string, rules ...R) (Tree, er
 	return NewLazyInstantTree(driver.NewJSONDriver(), name, template, rules...)
 }
 
+// NewLazyCacheJSONTree build a lazy json rule tree with cache TTL
+func NewLazyCacheJSONTree[R Rule](name, template string, ttl time.Duration, rules ...R) (Tree, error) {
+	return NewLazyCacheTree(driver.NewJSONDriver(), name, template, ttl, rules...)
+}
+
 // NewYAMLTree build a yaml rule tree
 func NewYAMLTree[R Rule](name, template string, rules ...R) (Tree, error) {
 	return NewTree(driver.NewYAMLDriver(), name, template, rules...)
@@ -43,6 +49,11 @@ func NewLazyYAMLTree[R Rule](name, template string, rules ...R) (Tree, error) {
 // NewLazyInstantYAMLTree build a yaml instant rule tree
 func NewLazyInstantYAMLTree[R Rule](name, template string, rules ...R) (Tree, error) {
 	return NewLazyInstantTree(driver.NewYAMLDriver(), name, template, rules...)
+}
+
+// NewLazyCacheYAMLTree build a lazy yaml rule tree with cache TTL
+func NewLazyCacheYAMLTree[R Rule](name, template string, ttl time.Duration, rules ...R) (Tree, error) {
+	return NewLazyCacheTree(driver.NewYAMLDriver(), name, template, ttl, rules...)
 }
 
 // NewTileTree build a tree with tile children
@@ -60,6 +71,11 @@ func NewLazyInstantTileTree[R Rule](name, template string, rules ...R) (Tree, er
 	return NewLazyInstantTree(driver.NewTileDriver(), name, template, rules...)
 }
 
+// NewLazyCacheTileTree build a tree with tile children in lazy cache mode
+func NewLazyCacheTileTree[R Rule](name, template string, ttl time.Duration, rules ...R) (Tree, error) {
+	return NewLazyCacheTree(driver.NewTileDriver(), name, template, ttl, rules...)
+}
+
 // NewTree build a rule tree.
 func NewTree[R Rule](driver driver.Driver, name, template string, rules ...R) (Tree, error) {
 	return buildTree(newTree[R](driver, name, template), toI(rules...)...)
@@ -73,6 +89,12 @@ func NewLazyTree[R Rule](driver driver.Driver, name, template string, rules ...R
 // NewLazyInstantTree build a lazy instant rule tree.
 func NewLazyInstantTree[R Rule](driver driver.Driver, name, template string, rules ...R) (Tree, error) {
 	return buildTree(newTree[R](driver, name, template).lazy().instant(), toI(rules...)...)
+}
+
+// NewLazyCacheTree build a lazy rule tree with cache TTL.
+// After the TTL expires, the next Get() triggers re-realization.
+func NewLazyCacheTree[R Rule](driver driver.Driver, name, template string, ttl time.Duration, rules ...R) (Tree, error) {
+	return buildTree(newTree[R](driver, name, template).lazy().cache(ttl), toI(rules...)...)
 }
 
 func newTree[R Rule](diver driver.Driver, name, template string) *tree {

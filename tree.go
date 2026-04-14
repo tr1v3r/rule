@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sync"
+	"time"
 
 	"golang.org/x/time/rate"
 
@@ -51,6 +52,12 @@ type tree struct {
 	procMu   sync.RWMutex
 	realized bool
 
+	// Cache TTL:
+	// When cacheTTL > 0, the cached result expires after this duration.
+	// A zero value means the cache never expires (standard lazy behavior).
+	cacheTTL   time.Duration
+	realizedAt time.Time
+
 	rlMu        sync.RWMutex
 	rateLimiter *rate.Limiter
 }
@@ -62,6 +69,11 @@ func (t *tree) lazy() *tree {
 
 func (t *tree) instant() *tree {
 	t.instantMode = true
+	return t
+}
+
+func (t *tree) cache(ttl time.Duration) *tree {
+	t.cacheTTL = ttl
 	return t
 }
 
@@ -104,6 +116,7 @@ func (t *tree) Get(path string) ([]byte, error) {
 		return nil, ErrNotExistsTree
 	}
 
+	// lazy instant/cahe mode 做realize才需要限流
 	if !t.allowGet() {
 		return nil, ErrRateLimited
 	}
@@ -217,6 +230,7 @@ func (t *tree) newSubTree(name string) Tree {
 		driver:      t.driver,
 		lazyMode:    t.lazyMode,
 		instantMode: t.instantMode,
+		cacheTTL:    t.cacheTTL,
 
 		level:    t.level + 1,
 		content:  t.get(),
@@ -236,7 +250,7 @@ func (t *tree) apply(procs ...driver.Processor) error {
 func (t *tree) realize(procs []driver.Processor) error {
 	t.procMu.Lock()
 	defer t.procMu.Unlock()
-	if !t.instantMode && t.realized {
+	if !t.instantMode && t.realized && (t.cacheTTL == 0 || time.Since(t.realizedAt) < t.cacheTTL) {
 		return nil
 	}
 
@@ -247,6 +261,7 @@ func (t *tree) realize(procs []driver.Processor) error {
 	t.set(rule)
 
 	t.realized = true
+	t.realizedAt = time.Now()
 	return nil
 }
 
@@ -266,7 +281,10 @@ func (t *tree) get() (rule []byte) {
 func (t *tree) needRealize() bool {
 	t.procMu.RLock()
 	defer t.procMu.RUnlock()
-	return !t.realized
+	if !t.realized {
+		return true
+	}
+	return t.cacheTTL > 0 && time.Since(t.realizedAt) >= t.cacheTTL
 }
 
 // byLevel sort rules by path level
