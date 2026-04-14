@@ -70,5 +70,3 @@ type RuleContext struct {
 	// ParentContent holds the realized content of the parent node.
 	ParentContent []byte
 }
-
-func (rc *RuleContext) Ctx() context.Context { return rc.Context }
