@@ -14,7 +14,7 @@ var DummyModem = &GeneralModem[Processor]{
 // NewDummyDriver ...
 func NewDummyDriver() *DummyDriver {
 	return &DummyDriver{
-		PathParser: new(DelimiterPathParser).WithDelimiter("/"),
+		PathParser: SlashPathParser,
 		Realizer:   new(StdRealizer),
 		Modem:      DummyModem,
 	}

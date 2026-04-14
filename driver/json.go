@@ -14,7 +14,7 @@ var _ Driver = (*JSONDriver)(nil)
 // NewJSONDriver create a new json driver
 func NewJSONDriver() *JSONDriver {
 	return &JSONDriver{
-		PathParser: new(DelimiterPathParser).WithDelimiter("/"),
+		PathParser: SlashPathParser,
 		Realizer:   new(StdRealizer),
 		Modem: &GeneralModem[*JSONProcessor]{
 			Marshaler:   json.Marshal,

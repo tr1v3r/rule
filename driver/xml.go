@@ -15,7 +15,7 @@ var _ Driver = (*XMLDriver)(nil)
 // NewXMLDriver create a new xml driver
 func NewXMLDriver() *XMLDriver {
 	return &XMLDriver{
-		PathParser: new(DelimiterPathParser).WithDelimiter("/"),
+		PathParser: SlashPathParser,
 		Realizer:   new(StdRealizer),
 		Modem: &GeneralModem[*XMLProcessor]{
 			Marshaler:   json.Marshal,

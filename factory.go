@@ -96,6 +96,26 @@ func NewLazyCacheXMLTree[R Rule](name, template string, ttl time.Duration, rules
 	return NewLazyCacheTree(driver.NewXMLDriver(), name, template, ttl, rules...)
 }
 
+// NewTOMLTree build a toml rule tree
+func NewTOMLTree[R Rule](name, template string, rules ...R) (Tree, error) {
+	return NewTree(driver.NewTOMLDriver(), name, template, rules...)
+}
+
+// NewLazyTOMLTree build a lazy toml rule tree
+func NewLazyTOMLTree[R Rule](name, template string, rules ...R) (Tree, error) {
+	return NewLazyTree(driver.NewTOMLDriver(), name, template, rules...)
+}
+
+// NewLazyInstantTOMLTree build a lazy instant toml rule tree
+func NewLazyInstantTOMLTree[R Rule](name, template string, rules ...R) (Tree, error) {
+	return NewLazyInstantTree(driver.NewTOMLDriver(), name, template, rules...)
+}
+
+// NewLazyCacheTOMLTree build a lazy toml rule tree with cache TTL
+func NewLazyCacheTOMLTree[R Rule](name, template string, ttl time.Duration, rules ...R) (Tree, error) {
+	return NewLazyCacheTree(driver.NewTOMLDriver(), name, template, ttl, rules...)
+}
+
 // NewTree build a rule tree.
 func NewTree[R Rule](driver driver.Driver, name, template string, rules ...R) (Tree, error) {
 	return buildTree(newTree[R](driver, name, template), toI(rules...)...)

@@ -9,7 +9,7 @@ var _ Driver = (*YAMLDriver)(nil)
 
 func NewYAMLDriver() *YAMLDriver {
 	return &YAMLDriver{
-		PathParser: new(DelimiterPathParser).WithDelimiter("/"),
+		PathParser: SlashPathParser,
 		Realizer:   new(StdRealizer),
 		Modem: &GeneralModem[*YAMLProcessor]{
 			Marshaler:   json.Marshal,
