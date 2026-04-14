@@ -69,7 +69,7 @@ func (op *XMLProcessor) Save() []byte {
 	return data
 }
 
-func (op *XMLProcessor) Process(before []byte) (after []byte, err error) {
+func (op *XMLProcessor) Process(_ *RuleContext, before []byte) (after []byte, err error) {
 	if len(before) == 0 {
 		before = []byte(`<root/>`)
 	}

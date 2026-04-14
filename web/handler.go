@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/tr1v3r/rule/driver"
 )
 
 // Ping status check
@@ -31,12 +32,19 @@ func GetRule(c *gin.Context) {
 	name := c.Query("name")
 	path := c.Query("path")
 
-	rule, err := f.Get(name).Get(path)
+	rc := driver.RuleContext{Context: c.Request.Context(), Params: make(map[string]string)}
+	for key, values := range c.Request.URL.Query() {
+		if len(values) > 0 && key != "name" && key != "path" {
+			rc.Params[key] = values[0]
+		}
+	}
+
+	rule, err := f.Get(name).GetWithContext(&rc, path)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"msg": fmt.Sprintf("query %s on %s fail: %s", path, name, err),
 		})
-
+		return
 	}
 	c.JSON(http.StatusOK, rule)
 }

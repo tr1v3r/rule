@@ -67,7 +67,7 @@ func (op *JSONProcessor) Save() []byte {
 	data, _ := json.Marshal(op)
 	return data
 }
-func (op *JSONProcessor) Process(before []byte) (after []byte, err error) {
+func (op *JSONProcessor) Process(_ *RuleContext, before []byte) (after []byte, err error) {
 	switch op.T {
 	case "create", "append", "replace":
 		return sjson.SetBytes(before, op.JSONPath, op.V)

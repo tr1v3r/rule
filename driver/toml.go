@@ -69,7 +69,7 @@ func (op *TOMLProcessor) Save() []byte {
 	return data
 }
 
-func (op *TOMLProcessor) Process(before []byte) (after []byte, err error) {
+func (op *TOMLProcessor) Process(_ *RuleContext, before []byte) (after []byte, err error) {
 	m := make(map[string]any)
 	if len(before) > 0 {
 		if err := toml.Unmarshal(before, &m); err != nil {

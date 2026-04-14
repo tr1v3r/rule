@@ -1,6 +1,7 @@
 package driver
 
 import (
+	"context"
 	"time"
 )
 
@@ -27,7 +28,7 @@ type PathParser interface {
 // Realizer realize rule
 type Realizer interface {
 	// Realize realize rule
-	Realize(rule []byte, ops ...Processor) ([]byte, error)
+	Realize(rc *RuleContext, rule []byte, ops ...Processor) ([]byte, error)
 }
 
 // Modem Processors modem
@@ -47,7 +48,7 @@ type Processor interface {
 	// Type return processor type
 	Type() string
 	// Process do process rule
-	Process(before []byte) (after []byte, err error)
+	Process(rc *RuleContext, before []byte) (after []byte, err error)
 
 	// informatin
 	Author() string
@@ -57,4 +58,15 @@ type Processor interface {
 	Load([]byte) error
 	// Save ...
 	Save() []byte
+}
+
+// RuleContext carries runtime information for dynamic rule construction.
+type RuleContext struct {
+	context.Context
+	// TreePath is the path of the current tree node being processed.
+	TreePath string
+	// Params holds key-value pairs from the request, for template interpolation etc.
+	Params map[string]string
+	// ParentContent holds the realized content of the parent node.
+	ParentContent []byte
 }

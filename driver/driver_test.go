@@ -81,7 +81,7 @@ func TestJSONDriver(t *testing.T) {
 		return
 	}
 	for _, op := range ops {
-		rule, err = op.Process(rule)
+		rule, err = op.Process(nil, rule)
 		if err != nil {
 			t.Errorf("Process fail: %s", err)
 			return
@@ -112,7 +112,7 @@ func TestYAMLProcessor(t *testing.T) {
 		}},
 	}
 	for _, op := range ops {
-		rule, err = op.Process(rule)
+		rule, err = op.Process(nil, rule)
 		if err != nil {
 			t.Errorf("Process fail: %s", err)
 			return
@@ -126,7 +126,7 @@ func TestTileDriver(t *testing.T) {
 
 	d := driver.NewTileDriver()
 
-	rule, err := d.Realize(rule, &driver.RawProcessor{Proc: func([]byte) ([]byte, error) { return []byte("abc\ndef"), nil }})
+	rule, err := d.Realize(nil, rule, &driver.RawProcessor{Proc: func([]byte) ([]byte, error) { return []byte("abc\ndef"), nil }})
 	if err != nil {
 		t.Errorf("realize fail: %s", rule)
 	}

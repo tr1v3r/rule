@@ -33,7 +33,7 @@ func TestTOMLDriver(t *testing.T) {
 
 	var rule []byte
 	for _, op := range ops {
-		rule, err = op.Process(rule)
+		rule, err = op.Process(nil, rule)
 		if err != nil {
 			t.Errorf("Process fail: %s", err)
 			return
@@ -55,7 +55,7 @@ func TestTOMLDriver(t *testing.T) {
 
 func TestTOMLProcessor_Create(t *testing.T) {
 	op := &driver.TOMLProcessor{T: "create", TOMLPath: "server.host", V: []byte(`"localhost"`)}
-	result, err := op.Process(nil)
+	result, err := op.Process(nil, nil)
 	if err != nil {
 		t.Errorf("Process fail: %s", err)
 		return
@@ -69,7 +69,7 @@ func TestTOMLProcessor_Create(t *testing.T) {
 func TestTOMLProcessor_Set(t *testing.T) {
 	before := []byte(`host = "old"`)
 	op := &driver.TOMLProcessor{T: "set", TOMLPath: "host", V: []byte(`"new"`)}
-	result, err := op.Process(before)
+	result, err := op.Process(nil, before)
 	if err != nil {
 		t.Errorf("Process fail: %s", err)
 		return
@@ -84,7 +84,7 @@ func TestTOMLProcessor_Delete(t *testing.T) {
 	before := []byte(`a = 1
 b = 2`)
 	op := &driver.TOMLProcessor{T: "delete", TOMLPath: "a"}
-	result, err := op.Process(before)
+	result, err := op.Process(nil, before)
 	if err != nil {
 		t.Errorf("Process fail: %s", err)
 		return
@@ -101,7 +101,7 @@ b = 2`)
 func TestTOMLProcessor_Replace(t *testing.T) {
 	before := []byte(`items = ["old"]`)
 	op := &driver.TOMLProcessor{T: "replace", TOMLPath: "items", V: []byte(`["new1", "new2"]`)}
-	result, err := op.Process(before)
+	result, err := op.Process(nil, before)
 	if err != nil {
 		t.Errorf("Process fail: %s", err)
 		return
@@ -117,7 +117,7 @@ func TestTOMLProcessor_Replace(t *testing.T) {
 
 func TestTOMLProcessor_EmptyBefore(t *testing.T) {
 	op := &driver.TOMLProcessor{T: "create", TOMLPath: "hello", V: []byte(`"world"`)}
-	result, err := op.Process(nil)
+	result, err := op.Process(nil, nil)
 	if err != nil {
 		t.Errorf("Process fail: %s", err)
 		return
@@ -130,7 +130,7 @@ func TestTOMLProcessor_EmptyBefore(t *testing.T) {
 
 func TestTOMLProcessor_UnknownType(t *testing.T) {
 	op := &driver.TOMLProcessor{T: "invalid", TOMLPath: "a"}
-	_, err := op.Process(nil)
+	_, err := op.Process(nil, nil)
 	if err == nil {
 		t.Error("expected error for unknown type")
 		return

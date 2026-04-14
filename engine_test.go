@@ -224,3 +224,94 @@ func TestLazyCacheTree_ZeroTTL(t *testing.T) {
 		t.Errorf("zero TTL should cache forever, got different results: %s vs %s", result1, result2)
 	}
 }
+
+func TestRealizeWithContext_Dispatch(t *testing.T) {
+	var gotRC *driver.RuleContext
+
+	proc := &driver.RawProcessor{
+		Proc: func(before []byte) ([]byte, error) {
+			return append(before, []byte("_ctx")...), nil
+		},
+	}
+
+	plainProc := &driver.JSONProcessor{T: "create", JSONPath: "key", V: []byte("val")}
+
+	r := new(driver.StdRealizer)
+	rc := &driver.RuleContext{Params: map[string]string{"foo": "bar"}}
+	result, err := r.Realize(rc, []byte("{}"), proc, plainProc)
+	if err != nil {
+		t.Fatalf("Realize fail: %s", err)
+	}
+
+	_ = gotRC
+	t.Logf("got result: %s", result)
+}
+
+func TestTree_GetWithContext(t *testing.T) {
+	var gotRC *driver.RuleContext
+
+	proc := &contextCapturingProcessor{capture: func(rc *driver.RuleContext) { gotRC = rc }}
+
+	tree, err := NewLazyTree(
+		&struct {
+			driver.Modem
+			driver.PathParser
+			driver.StdRealizer
+			driver.DummyDriver
+		}{Modem: driver.DummyModem, PathParser: driver.SlashPathParser},
+		"ctx_test", `{}`,
+		NewRule("/a/b", proc),
+	)
+	if err != nil {
+		t.Fatalf("build tree fail: %s", err)
+	}
+
+	rc := driver.RuleContext{Params: map[string]string{"user": "alice"}}
+	result, err := tree.GetWithContext(&rc, "/a/b")
+	if err != nil {
+		t.Fatalf("GetWithContext fail: %s", err)
+	}
+
+	if gotRC == nil || gotRC.Params["user"] != "alice" {
+		t.Errorf("expected user=alice, got %v", gotRC)
+	}
+	if gotRC.TreePath != "/a/b" {
+		t.Errorf("expected TreePath=/a/b, got %s", gotRC.TreePath)
+	}
+
+	t.Logf("got result: %s", result)
+}
+
+// contextCapturingProcessor is a test processor that captures the RuleContext
+type contextCapturingProcessor struct {
+	capture func(*driver.RuleContext)
+}
+
+func (p *contextCapturingProcessor) Type() string                                    { return "test" }
+func (p *contextCapturingProcessor) Path() string                                    { return "" }
+func (p *contextCapturingProcessor) Author() string                                  { return "" }
+func (p *contextCapturingProcessor) CreatedAt() time.Time                            { return time.Time{} }
+func (p *contextCapturingProcessor) Load([]byte) error                               { return nil }
+func (p *contextCapturingProcessor) Save() []byte                                    { return nil }
+func (p *contextCapturingProcessor) Process(rc *driver.RuleContext, before []byte) ([]byte, error) {
+	if p.capture != nil {
+		p.capture(rc)
+	}
+	return []byte(`{"ok":true}`), nil
+}
+
+func TestRawProcessor_Fallback(t *testing.T) {
+	proc := &driver.RawProcessor{
+		Proc: func(before []byte) ([]byte, error) {
+			return []byte("fallback"), nil
+		},
+	}
+
+	result, err := proc.Process(nil, []byte("input"))
+	if err != nil {
+		t.Fatalf("Process fail: %s", err)
+	}
+	if string(result) != "fallback" {
+		t.Errorf("expected fallback, got %s", result)
+	}
+}

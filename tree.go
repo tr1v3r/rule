@@ -147,6 +147,28 @@ func (t *tree) Get(path string) ([]byte, error) {
 	return t.get(), nil
 }
 
+// GetWithContext retrieves rule data with runtime context for dynamic construction.
+func (t *tree) GetWithContext(rc *driver.RuleContext, path string) ([]byte, error) {
+	if t == nil {
+		return nil, ErrNotExistsTree
+	}
+
+	if rc != nil {
+		rc.TreePath = t.path
+	}
+	if err := t.realizeWithContext(rc, t.procs); err != nil {
+		return nil, fmt.Errorf("realize rule on %s fail: %w", t.Path(), err)
+	}
+
+	if child := t.pickChild(t.driver.GetNameByLevel(path, t.level+1)); child != nil {
+		if child, ok := child.(*tree); ok {
+			child.inherit(t)
+		}
+		return child.GetWithContext(rc, path)
+	}
+	return t.get(), nil
+}
+
 // inherit set content by parent's content after check mode and realization
 func (t *tree) inherit(parent *tree) {
 	if t.lazyMode && t.needRealize() {
@@ -261,6 +283,10 @@ func (t *tree) apply(procs ...driver.Processor) error {
 }
 
 func (t *tree) realize(procs []driver.Processor) error {
+	return t.realizeWithContext(nil, procs)
+}
+
+func (t *tree) realizeWithContext(rc *driver.RuleContext, procs []driver.Processor) error {
 	// Fast path: read lock 检查是否可以跳过 realization
 	t.realizeMu.RLock()
 	if !t.instantMode && !t.realizedAt.IsZero() && (t.cacheTTL == 0 || time.Since(t.realizedAt) < t.cacheTTL) {
@@ -282,7 +308,7 @@ func (t *tree) realize(procs []driver.Processor) error {
 		return ErrRateLimited
 	}
 
-	rule, err := t.driver.Realize(t.get(), procs...)
+	rule, err := t.driver.Realize(rc, t.get(), procs...)
 	if err != nil {
 		return fmt.Errorf("realize rule fail: %w", err)
 	}

@@ -8,6 +8,8 @@ import (
 	"github.com/tr1v3r/pkg/guard"
 	"github.com/tr1v3r/pkg/log"
 	"golang.org/x/time/rate"
+
+	"github.com/tr1v3r/rule/driver"
 )
 
 var _ Forest = (*forest)(nil)
@@ -109,6 +111,20 @@ func (f *forest) GetVal(treeName, path string) (rule []byte, err error) {
 	}
 
 	return tree.Get(path)
+}
+
+// GetValWithContext get value from tree with context
+func (f *forest) GetValWithContext(rc *driver.RuleContext, treeName, path string) (rule []byte, err error) {
+	tree := f.Get(treeName)
+	if tree == nil {
+		return nil, ErrNotExistsTree
+	}
+
+	if !f.allowGet() {
+		return nil, ErrRateLimited
+	}
+
+	return tree.GetWithContext(rc, path)
 }
 
 // allowGet checks if the rate limiter allows this request.

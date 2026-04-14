@@ -118,23 +118,23 @@ func NewLazyCacheTOMLTree[R Rule](name, template string, ttl time.Duration, rule
 
 // NewTree build a rule tree.
 func NewTree[R Rule](driver driver.Driver, name, template string, rules ...R) (Tree, error) {
-	return buildTree(newTree[R](driver, name, template), toI(rules...)...)
+	return buildTree(newTree[R](driver, name, template), toA(rules...)...)
 }
 
 // NewLazyTree build a lazy rule tree.
 func NewLazyTree[R Rule](driver driver.Driver, name, template string, rules ...R) (Tree, error) {
-	return buildTree(newTree[R](driver, name, template).lazy(), toI(rules...)...)
+	return buildTree(newTree[R](driver, name, template).lazy(), toA(rules...)...)
 }
 
 // NewLazyInstantTree build a lazy instant rule tree.
 func NewLazyInstantTree[R Rule](driver driver.Driver, name, template string, rules ...R) (Tree, error) {
-	return buildTree(newTree[R](driver, name, template).lazy().instant(), toI(rules...)...)
+	return buildTree(newTree[R](driver, name, template).lazy().instant(), toA(rules...)...)
 }
 
 // NewLazyCacheTree build a lazy rule tree with cache TTL.
 // After the TTL expires, the next Get() triggers re-realization.
 func NewLazyCacheTree[R Rule](driver driver.Driver, name, template string, ttl time.Duration, rules ...R) (Tree, error) {
-	return buildTree(newTree[R](driver, name, template).lazy().cache(ttl), toI(rules...)...)
+	return buildTree(newTree[R](driver, name, template).lazy().cache(ttl), toA(rules...)...)
 }
 
 func newTree[R Rule](diver driver.Driver, name, template string) *tree {
@@ -152,7 +152,7 @@ func buildTree(tree *tree, rules ...Rule) (Tree, error) {
 	}
 	return tree, nil
 }
-func toI[R Rule](rules ...R) (ruleArray []Rule) {
+func toA[R Rule](rules ...R) (ruleArray []Rule) {
 	for _, rule := range rules {
 		ruleArray = append(ruleArray, rule)
 	}

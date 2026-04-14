@@ -43,7 +43,7 @@ func (op *YAMLProcessor) Save() []byte {
 	data, _ := json.Marshal(op)
 	return data
 }
-func (op *YAMLProcessor) Process(before []byte) (after []byte, err error) {
+func (op *YAMLProcessor) Process(_ *RuleContext, before []byte) (after []byte, err error) {
 	// var result any
 	// if err := yaml.Unmarshal([]byte(before), &result); err != nil {
 	// 	return "", fmt.Errorf("unmarshal yaml fail: %w", err)

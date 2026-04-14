@@ -25,6 +25,8 @@ type Forest interface {
 	Set(tree Tree)
 	// GetVal get value from tree
 	GetVal(treeName, path string) (rule []byte, err error)
+	// GetValWithContext retrieves a value with runtime context.
+	GetValWithContext(rc *driver.RuleContext, treeName, path string) (rule []byte, err error)
 
 	Info() string
 
@@ -44,6 +46,8 @@ type Tree interface {
 	Set(Rule) error
 	// Get query rule from tree by path
 	Get(path string) (rule []byte, err error)
+	// GetWithContext retrieves rule data with runtime context for dynamic construction.
+	GetWithContext(rc *driver.RuleContext, path string) (rule []byte, err error)
 
 	// Has check if has tree node for path
 	Has(path string) bool

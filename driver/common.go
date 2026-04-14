@@ -46,13 +46,13 @@ var _ Realizer = (*StdRealizer)(nil)
 type StdRealizer struct{}
 
 // Realizer calculate rule
-func (r *StdRealizer) Realize(rule []byte, procs ...Processor) ([]byte, error) {
+func (r *StdRealizer) Realize(rc *RuleContext, rule []byte, procs ...Processor) ([]byte, error) {
 	var err error
 	for _, proc := range procs {
 		if proc == nil {
 			continue
 		}
-		if rule, err = proc.Process(rule); err != nil {
+		if rule, err = proc.Process(rc, rule); err != nil {
 			return nil, fmt.Errorf("do %s on %s fail: %w", proc.Type(), proc.Path(), err)
 		}
 	}

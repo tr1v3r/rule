@@ -32,7 +32,7 @@ func TestXMLDriver(t *testing.T) {
 
 	var rule []byte
 	for _, op := range ops {
-		rule, err = op.Process(rule)
+		rule, err = op.Process(nil, rule)
 		if err != nil {
 			t.Errorf("Process fail: %s", err)
 			return
@@ -54,7 +54,7 @@ func TestXMLDriver(t *testing.T) {
 
 func TestXMLProcessor_Create(t *testing.T) {
 	op := &driver.XMLProcessor{T: "create", XMLPath: "root/users/user", V: []byte("alice")}
-	result, err := op.Process(nil)
+	result, err := op.Process(nil, nil)
 	if err != nil {
 		t.Errorf("Process fail: %s", err)
 		return
@@ -68,7 +68,7 @@ func TestXMLProcessor_Create(t *testing.T) {
 func TestXMLProcessor_Set(t *testing.T) {
 	before := []byte(`<root><name>old</name></root>`)
 	op := &driver.XMLProcessor{T: "set", XMLPath: "root/name", V: []byte("new")}
-	result, err := op.Process(before)
+	result, err := op.Process(nil, before)
 	if err != nil {
 		t.Errorf("Process fail: %s", err)
 		return
@@ -82,7 +82,7 @@ func TestXMLProcessor_Set(t *testing.T) {
 func TestXMLProcessor_Delete(t *testing.T) {
 	before := []byte(`<root><a>1</a><b>2</b></root>`)
 	op := &driver.XMLProcessor{T: "delete", XMLPath: "root/a"}
-	result, err := op.Process(before)
+	result, err := op.Process(nil, before)
 	if err != nil {
 		t.Errorf("Process fail: %s", err)
 		return
@@ -99,7 +99,7 @@ func TestXMLProcessor_Delete(t *testing.T) {
 func TestXMLProcessor_Replace(t *testing.T) {
 	before := []byte(`<root><items><item>old</item></items></root>`)
 	op := &driver.XMLProcessor{T: "replace", XMLPath: "root/items", V: []byte("<item>new1</item><item>new2</item>")}
-	result, err := op.Process(before)
+	result, err := op.Process(nil, before)
 	if err != nil {
 		t.Errorf("Process fail: %s", err)
 		return
@@ -115,7 +115,7 @@ func TestXMLProcessor_Replace(t *testing.T) {
 
 func TestXMLProcessor_EmptyBefore(t *testing.T) {
 	op := &driver.XMLProcessor{T: "create", XMLPath: "root/hello", V: []byte("world")}
-	result, err := op.Process(nil)
+	result, err := op.Process(nil, nil)
 	if err != nil {
 		t.Errorf("Process fail: %s", err)
 		return
@@ -128,7 +128,7 @@ func TestXMLProcessor_EmptyBefore(t *testing.T) {
 
 func TestXMLProcessor_UnknownType(t *testing.T) {
 	op := &driver.XMLProcessor{T: "invalid", XMLPath: "root/a"}
-	_, err := op.Process(nil)
+	_, err := op.Process(nil, nil)
 	if err == nil {
 		t.Error("expected error for unknown type")
 		return
