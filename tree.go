@@ -109,6 +109,26 @@ func (t *tree) Set(r Rule) error {
 	return t.getChild(t.driver.GetNameByLevel(r.Path(), t.level+1)).Set(r)
 }
 
+// Get retrieves the rule data at the given path.
+//
+// The tree is organized as a hierarchical structure where each node corresponds to a
+// path level. Get traverses the tree level by level, from root to the target node:
+//
+//  1. Realize: Apply this node's processors to compute its content.
+//     In standard mode, this happens once during tree building.
+//     In lazy/instant/cache mode, this happens on each access (with caching behavior
+//     varying by mode). Rate limiting, if configured, is enforced at this step.
+//
+//  2. Descend: If the target path is deeper than this node's level, look up the child
+//     corresponding to the next path segment. Before recursing into the child, inherit
+//     passes this node's realized content to the child so it has a base to build upon
+//     (relevant for lazy mode where the child may not yet have its own content).
+//
+//  3. Return: If this node matches the target level, return its content directly.
+//
+// The recursion forms a chain: root → level1 → level2 → ... → target node.
+// Each level realizes its own content before passing control to the next, ensuring
+// the content flows correctly down the tree hierarchy.
 func (t *tree) Get(path string) ([]byte, error) {
 	if t == nil {
 		return nil, ErrNotExistsTree
