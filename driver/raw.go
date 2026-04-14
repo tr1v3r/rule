@@ -52,7 +52,7 @@ func (c *CombinedProcessor) Process(rc *RuleContext, before []byte) ([]byte, err
 			continue
 		}
 		if before, err = proc.Process(rc, before); err != nil {
-			return nil, fmt.Errorf("do %s on %s fail: %w", proc.Type(), proc.Path(), err)
+			return nil, fmt.Errorf("combined processors do %s on %s fail: %w", proc.Type(), proc.Path(), err)
 		}
 	}
 	return before, nil
