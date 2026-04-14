@@ -241,8 +241,18 @@ func (t *tree) apply(procs ...driver.Processor) error {
 }
 
 func (t *tree) realize(procs []driver.Processor) error {
+	// Fast path: read lock 检查是否可以跳过 realization
+	t.realizeMu.RLock()
+	if !t.instantMode && !t.realizedAt.IsZero() && (t.cacheTTL == 0 || time.Since(t.realizedAt) < t.cacheTTL) {
+		t.realizeMu.RUnlock()
+		return nil
+	}
+	t.realizeMu.RUnlock()
+
+	// Slow path: write lock 执行实际 realization
 	t.realizeMu.Lock()
 	defer t.realizeMu.Unlock()
+	// Double-check: 拿到写锁后再次检查，防止多个 goroutine 同时通过 fast path
 	if !t.instantMode && !t.realizedAt.IsZero() && (t.cacheTTL == 0 || time.Since(t.realizedAt) < t.cacheTTL) {
 		return nil
 	}
