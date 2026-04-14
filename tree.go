@@ -49,13 +49,11 @@ type tree struct {
 	// and data consistency.
 	instantMode bool
 
-	procMu   sync.RWMutex
-	realized bool
-
 	// Cache TTL:
 	// When cacheTTL > 0, the cached result expires after this duration.
 	// A zero value means the cache never expires (standard lazy behavior).
 	cacheTTL   time.Duration
+	realizeMu  sync.RWMutex
 	realizedAt time.Time
 
 	rlMu        sync.RWMutex
@@ -89,8 +87,8 @@ func (t *tree) build(rules ...Rule) error {
 func (t *tree) Name() string { return t.name }
 func (t *tree) Path() string { return t.path }
 
-// allowGet checks if the rate limiter allows this request.
-func (t *tree) allowGet() bool {
+// allow checks if the rate limiter allows this request.
+func (t *tree) allow() bool {
 	t.rlMu.RLock()
 	limiter := t.rateLimiter
 	t.rlMu.RUnlock()
@@ -114,11 +112,6 @@ func (t *tree) Set(r Rule) error {
 func (t *tree) Get(path string) ([]byte, error) {
 	if t == nil {
 		return nil, ErrNotExistsTree
-	}
-
-	// lazy instant/cahe mode 做realize才需要限流
-	if !t.allowGet() {
-		return nil, ErrRateLimited
 	}
 
 	if err := t.realize(t.procs); err != nil {
@@ -248,10 +241,15 @@ func (t *tree) apply(procs ...driver.Processor) error {
 }
 
 func (t *tree) realize(procs []driver.Processor) error {
-	t.procMu.Lock()
-	defer t.procMu.Unlock()
-	if !t.instantMode && t.realized && (t.cacheTTL == 0 || time.Since(t.realizedAt) < t.cacheTTL) {
+	t.realizeMu.Lock()
+	defer t.realizeMu.Unlock()
+	if !t.instantMode && !t.realizedAt.IsZero() && (t.cacheTTL == 0 || time.Since(t.realizedAt) < t.cacheTTL) {
 		return nil
+	}
+
+	// 限流仅针对 lazy/instant/cache 模式，标准模式在 build 阶段 realize 不限流
+	if (t.lazyMode || t.instantMode || t.cacheTTL > 0) && !t.allow() {
+		return ErrRateLimited
 	}
 
 	rule, err := t.driver.Realize(t.get(), procs...)
@@ -260,7 +258,6 @@ func (t *tree) realize(procs []driver.Processor) error {
 	}
 	t.set(rule)
 
-	t.realized = true
 	t.realizedAt = time.Now()
 	return nil
 }
@@ -279,9 +276,12 @@ func (t *tree) get() (rule []byte) {
 }
 
 func (t *tree) needRealize() bool {
-	t.procMu.RLock()
-	defer t.procMu.RUnlock()
-	if !t.realized {
+	t.realizeMu.RLock()
+	defer t.realizeMu.RUnlock()
+	if t.instantMode {
+		return true
+	}
+	if t.realizedAt.IsZero() {
 		return true
 	}
 	return t.cacheTTL > 0 && time.Since(t.realizedAt) >= t.cacheTTL
