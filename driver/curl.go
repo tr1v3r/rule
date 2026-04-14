@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"net/url"
 	"strings"
 	"time"
 
@@ -47,24 +46,15 @@ func (op *CURLProcessor) Save() []byte {
 	return data
 }
 func (op *CURLProcessor) Process(rc *RuleContext, _ []byte) ([]byte, error) {
-	u := op.URL
-	if rc != nil {
-		var params = make(url.Values, len(rc.Params))
-		for k, v := range rc.Params {
-			params[k] = append(params[k], v)
-		}
-		u += "?" + params.Encode()
-	}
-
 	method := strings.ToUpper(strings.TrimSpace(op.Method))
 	if method == "" {
 		method = "GET"
 	}
 
-	_, content, _, err := fetch.DoRequestWithOptions(method, u,
+	_, content, _, err := fetch.DoRequestWithOptions(method, op.URL,
 		[]fetch.RequestOption{fetch.WithHeaders(op.Header)}, bytes.NewReader(op.Body))
 	if err != nil {
-		return nil, fmt.Errorf("request url %s %s fail: %w", method, u, err)
+		return nil, fmt.Errorf("request url %s %s fail: %w", method, op.URL, err)
 	}
 	return content, nil
 }
