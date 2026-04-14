@@ -76,6 +76,26 @@ func NewLazyCacheTileTree[R Rule](name, template string, ttl time.Duration, rule
 	return NewLazyCacheTree(driver.NewTileDriver(), name, template, ttl, rules...)
 }
 
+// NewXMLTree build an xml rule tree
+func NewXMLTree[R Rule](name, template string, rules ...R) (Tree, error) {
+	return NewTree(driver.NewXMLDriver(), name, template, rules...)
+}
+
+// NewLazyXMLTree build a lazy xml rule tree
+func NewLazyXMLTree[R Rule](name, template string, rules ...R) (Tree, error) {
+	return NewLazyTree(driver.NewXMLDriver(), name, template, rules...)
+}
+
+// NewLazyInstantXMLTree build a lazy instant xml rule tree
+func NewLazyInstantXMLTree[R Rule](name, template string, rules ...R) (Tree, error) {
+	return NewLazyInstantTree(driver.NewXMLDriver(), name, template, rules...)
+}
+
+// NewLazyCacheXMLTree build a lazy xml rule tree with cache TTL
+func NewLazyCacheXMLTree[R Rule](name, template string, ttl time.Duration, rules ...R) (Tree, error) {
+	return NewLazyCacheTree(driver.NewXMLDriver(), name, template, ttl, rules...)
+}
+
 // NewTree build a rule tree.
 func NewTree[R Rule](driver driver.Driver, name, template string, rules ...R) (Tree, error) {
 	return buildTree(newTree[R](driver, name, template), toI(rules...)...)

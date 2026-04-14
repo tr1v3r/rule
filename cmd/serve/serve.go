@@ -102,6 +102,8 @@ func load() (rules []rule.Rule) {
 				op = new(driver.YAMLProcessor)
 			case "curl":
 				op = new(driver.CURLProcessor)
+			case "xml":
+				op = new(driver.XMLProcessor)
 			}
 			if op != nil {
 				if err := op.Load(opData.Data); err != nil {
