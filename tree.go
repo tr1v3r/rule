@@ -33,6 +33,9 @@ type tree struct {
 	// only set when tree build, only concurrent reads, so mutex is verbose
 	procs []driver.Processor
 
+	// fallback is called when path resolution cannot find a matching child.
+	fallback driver.Processor
+
 	// Lazy Mode:
 	// In Lazy Mode, tree nodes are not created or calculated during initialization.
 	// Only the root node exists initially, and other nodes are dynamically initialized
@@ -144,7 +147,7 @@ func (t *tree) Get(path string) ([]byte, error) {
 		}
 		return child.Get(path)
 	}
-	return t.get(), nil
+	return t.doFallback(nil, t.get())
 }
 
 // GetWithContext retrieves rule data with runtime context for dynamic construction.
@@ -166,7 +169,21 @@ func (t *tree) GetWithContext(rc *driver.RuleContext, path string) ([]byte, erro
 		}
 		return child.GetWithContext(rc, path)
 	}
-	return t.get(), nil
+	return t.doFallback(rc, t.get())
+}
+
+// doFallback calls the fallback processor if set, otherwise returns content unchanged.
+func (t *tree) doFallback(rc *driver.RuleContext, content []byte) ([]byte, error) {
+	if t.fallback == nil {
+		return content, nil
+	}
+	return t.fallback.Process(rc, content)
+}
+
+// SetFallback sets a processor to handle cases where path resolution
+// cannot find a matching child node.
+func (t *tree) SetFallback(proc driver.Processor) {
+	t.fallback = proc
 }
 
 // inherit set content by parent's content after check mode and realization

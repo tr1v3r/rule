@@ -62,6 +62,10 @@ type Tree interface {
 
 	// SetRateLimit sets a rate limit for Get calls on this tree.
 	SetRateLimit(r rate.Limit, burst int)
+
+	// SetFallback sets a processor to handle cases where path resolution
+	// cannot find a matching child node.
+	SetFallback(proc driver.Processor)
 }
 
 // Rule rule for tree

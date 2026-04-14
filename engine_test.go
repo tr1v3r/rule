@@ -3,6 +3,7 @@ package rule
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -314,4 +315,145 @@ func TestRawProcessor_Fallback(t *testing.T) {
 	if string(result) != "fallback" {
 		t.Errorf("expected fallback, got %s", result)
 	}
+}
+
+func TestTree_Fallback(t *testing.T) {
+	var fallbackCalled bool
+
+	tree, err := NewTree(
+		&struct {
+			driver.Modem
+			driver.PathParser
+			driver.StdRealizer
+			driver.DummyDriver
+		}{Modem: driver.DummyModem, PathParser: driver.SlashPathParser},
+		"fallback_test", `{"base":true}`,
+		NewRule("/", &driver.JSONProcessor{T: "create", JSONPath: "root", V: []byte("yes")}),
+	)
+	if err != nil {
+		t.Fatalf("build tree fail: %s", err)
+	}
+
+	tree.SetFallback(&driver.RawProcessor{
+		Proc: func(before []byte) ([]byte, error) {
+			fallbackCalled = true
+			return append(before, []byte(`,"fallback":true}`)...), nil
+		},
+	})
+
+	// Query a path that does not exist — should trigger fallback
+	result, err := tree.Get("/nonexistent")
+	if err != nil {
+		t.Fatalf("get fail: %s", err)
+	}
+	if !fallbackCalled {
+		t.Error("expected fallback to be called")
+	}
+	s := string(result)
+	if !containsJSON(s, `"fallback":true`) {
+		t.Errorf("expected fallback content in result, got: %s", s)
+	}
+	t.Logf("fallback result: %s", s)
+
+	// Query existing root path — should also trigger fallback (no child for root level)
+	fallbackCalled = false
+	result2, err := tree.Get("/")
+	if err != nil {
+		t.Fatalf("get root fail: %s", err)
+	}
+	if !fallbackCalled {
+		t.Error("expected fallback to be called for root query")
+	}
+	t.Logf("root fallback result: %s", string(result2))
+}
+
+func TestTree_FallbackWithContext(t *testing.T) {
+	var gotRC *driver.RuleContext
+
+	tree, err := NewTree(
+		&struct {
+			driver.Modem
+			driver.PathParser
+			driver.StdRealizer
+			driver.DummyDriver
+		}{Modem: driver.DummyModem, PathParser: driver.SlashPathParser},
+		"ctx_fallback_test", `{}`,
+		NewRule("/", &driver.JSONProcessor{T: "create", JSONPath: "v", V: []byte("1")}),
+	)
+	if err != nil {
+		t.Fatalf("build tree fail: %s", err)
+	}
+
+	tree.SetFallback(&contextCapturingProcessor{capture: func(rc *driver.RuleContext) {
+		gotRC = rc
+	}})
+
+	rc := &driver.RuleContext{Params: map[string]string{"user": "bob"}}
+	_, err = tree.GetWithContext(rc, "/missing")
+	if err != nil {
+		t.Fatalf("GetWithContext fail: %s", err)
+	}
+	if gotRC == nil || gotRC.Params["user"] != "bob" {
+		t.Errorf("expected user=bob in fallback context, got %v", gotRC)
+	}
+}
+
+func TestCombineProcessor(t *testing.T) {
+	combined := driver.CombineProcessor(
+		&driver.JSONProcessor{T: "create", JSONPath: "name", V: []byte("alice")},
+		&driver.JSONProcessor{T: "create", JSONPath: "age", V: []byte("30")},
+	)
+
+	result, err := combined.Process(nil, []byte(`{}`))
+	if err != nil {
+		t.Fatalf("Process fail: %s", err)
+	}
+	s := string(result)
+	if !strings.Contains(s, `"name":"alice"`) {
+		t.Errorf("expected name=alice, got: %s", s)
+	}
+	if !strings.Contains(s, `"age":"30"`) {
+		t.Errorf("expected age=30, got: %s", s)
+	}
+	t.Logf("combined result: %s", s)
+}
+
+func TestCombineProcessor_WithFallback(t *testing.T) {
+	// Use CombineProcessor as a tree fallback
+	combined := driver.CombineProcessor(
+		&driver.JSONProcessor{T: "create", JSONPath: "fallback", V: []byte("true")},
+		&driver.JSONProcessor{T: "create", JSONPath: "extra", V: []byte("data")},
+	)
+
+	tree, err := NewTree[*rule](
+		&struct {
+			driver.Modem
+			driver.PathParser
+			driver.StdRealizer
+			driver.DummyDriver
+		}{Modem: driver.DummyModem, PathParser: driver.SlashPathParser},
+		"combined_fallback_test", `{"base":1}`,
+	)
+	if err != nil {
+		t.Fatalf("build tree fail: %s", err)
+	}
+
+	tree.SetFallback(combined)
+
+	result, err := tree.Get("/missing")
+	if err != nil {
+		t.Fatalf("get fail: %s", err)
+	}
+	s := string(result)
+	if !strings.Contains(s, `"fallback":"true"`) {
+		t.Errorf("expected fallback=true, got: %s", s)
+	}
+	if !strings.Contains(s, `"extra":"data"`) {
+		t.Errorf("expected extra=data, got: %s", s)
+	}
+	t.Logf("combined fallback result: %s", s)
+}
+
+func containsJSON(s, sub string) bool {
+	return strings.Contains(s, sub)
 }
