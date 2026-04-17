@@ -1,4 +1,4 @@
-package rule
+package ivy
 
 import (
 	"encoding/json"
@@ -8,7 +8,7 @@ import (
 
 	"golang.org/x/time/rate"
 
-	"github.com/tr1v3r/rule/driver"
+	"github.com/tr1v3r/ivy/driver"
 )
 
 var _ Tree = (*tree)(nil)
@@ -80,7 +80,7 @@ func (t *tree) cache(ttl time.Duration) *tree {
 	return t
 }
 
-func (t *tree) build(rules ...Rule) error {
+func (t *tree) build(rules ...Directive) error {
 	for _, r := range byLevel(t.driver, rules) {
 		if err := t.Set(r); err != nil {
 			return fmt.Errorf("apply rule fail: %w", err)
@@ -107,7 +107,7 @@ func (t *tree) SetRateLimit(r rate.Limit, burst int) {
 	t.rateLimiter = rate.NewLimiter(r, burst)
 }
 
-func (t *tree) Set(r Rule) error {
+func (t *tree) Set(r Directive) error {
 	if level := t.driver.GetLevel(r.Path()); t.level == level { // check if level matched, include root node
 		return t.apply(r.Processors()...)
 	}
@@ -311,7 +311,7 @@ func (t *tree) newSubTree(name string) Tree {
 	}
 }
 
-// updateRule parse raw rule Processor to tree node.
+// updateDirective parse raw rule Processor to tree node.
 func (t *tree) apply(procs ...driver.Processor) error {
 	if t.lazyMode {
 		t.procs = procs
@@ -385,7 +385,7 @@ func (t *tree) needRealize() bool {
 }
 
 // byLevel sort rules by path level
-func byLevel[R Rule](driver driver.Driver, rules []R) []R {
+func byLevel[R Directive](driver driver.Driver, rules []R) []R {
 	by[R](func(x, y R) bool { return driver.GetLevel(x.Path()) < driver.GetLevel(y.Path()) }).Sort(rules)
 	return rules
 }

@@ -44,7 +44,7 @@ func RegisterApi(r *gin.RouterGroup) {
 		list.GET("node", Ping)
 	}
 
-	// configure about rule enginee
+	// configure about ivy engine
 	config := r.Group("config")
 	{
 		// return config

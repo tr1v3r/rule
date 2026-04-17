@@ -4,25 +4,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Go-based rule engine that provides hierarchical rule processing with support for JSON, YAML, and custom data formats. The engine supports lazy evaluation, instant mode, and tree-based rule organization.
+This is a Go-based hierarchical content-construction engine (ivy) that supports JSON, YAML, XML, TOML, and custom data formats. The engine supports lazy evaluation, instant mode, cache TTL, and tree-based content organization.
 
 ## Architecture
 
 ### Core Components
 
-- **Forest**: Manages multiple rule trees and provides tree lifecycle management
-- **Tree**: Hierarchical structure for organizing rules with path-based access
-- **Rule**: Individual rule with path and processors
-- **Driver**: Handles data format processing (JSON, YAML, Tile, etc.)
-- **Processor**: Rule processing operations (JSON manipulation, HTTP calls, etc.)
+- **Forest**: Manages multiple trees and provides tree lifecycle management
+- **Tree**: Hierarchical structure with path-based access and layered content transformation
+- **Directive**: Path + processors pair that defines a transformation on the tree
+- **Driver**: Handles data format processing (JSON, YAML, XML, TOML, Tile, etc.)
+- **Processor**: Content transformation operations (JSON manipulation, HTTP calls, etc.)
 
 ### Key Interfaces
 
 - `Forest`: Tree collection management with refresh capabilities
-- `Tree`: Hierarchical rule storage with path-based operations
-- `Rule`: Individual rule definition with processors
+- `Tree`: Hierarchical content storage with path-based operations
+- `Directive`: Path and processor definition for content transformation
 - `Driver`: Data format handling and path parsing
-- `Processor`: Rule transformation operations
+- `Processor`: Content transformation operations
 
 ## Development Commands
 
@@ -36,7 +36,7 @@ go test ./...
 go test ./driver
 
 # Build the server binary
-go build -o rule-server ./cmd/serve
+go build -o ivy-server ./cmd/serve
 ```
 
 ### Running the Server
@@ -45,7 +45,7 @@ go build -o rule-server ./cmd/serve
 # Run the server with default configuration
 go run ./cmd/serve
 
-# Run with custom rules file
+# Run with custom directives file
 RULES_FILE=path/to/rules.json go run ./cmd/serve
 
 # Run with custom shutdown timeout
@@ -65,6 +65,7 @@ http://localhost:8080/swagger/index.html
 
 - **Lazy Mode**: Nodes are created and calculated only when accessed
 - **Instant Mode**: Nodes are recalculated on every access for real-time data
+- **Cache TTL Mode**: Lazy with time-based cache expiration
 - **Standard Mode**: Full tree built during initialization
 
 ### Driver System
@@ -72,6 +73,8 @@ http://localhost:8080/swagger/index.html
 Multiple driver implementations:
 - `JSONDriver`: JSON data format processing
 - `YAMLDriver`: YAML data format processing
+- `XMLDriver`: XML data format processing
+- `TOMLDriver`: TOML data format processing
 - `TileDriver`: Custom tile-based processing
 - `webDriver`: Web API integration driver
 
@@ -79,7 +82,11 @@ Multiple driver implementations:
 
 - `JSONProcessor`: JSON data manipulation
 - `YAMLProcessor`: YAML data manipulation
+- `XMLProcessor`: XML data manipulation
+- `TOMLProcessor`: TOML data manipulation
 - `CURLProcessor`: HTTP request processing
+- `RawProcessor`: Custom transformation function
+- `CombinedProcessor`: Combines multiple processors
 
 ## File Structure
 
@@ -87,7 +94,7 @@ Multiple driver implementations:
 ├── cmd/serve/           # Server entry point
 ├── driver/              # Data format drivers and processors
 ├── web/                 # HTTP server and API handlers
-├── rule.go              # Rule interface and implementation
+├── directive.go         # Directive interface and implementation
 ├── tree.go              # Tree structure and operations
 ├── forest.go            # Forest management
 ├── factory.go           # Factory methods for tree creation
@@ -98,12 +105,12 @@ Multiple driver implementations:
 
 ### Environment Variables
 
-- `RULES_FILE`: Path to rules configuration file (default: `../../conf/rules.json`)
+- `RULES_FILE`: Path to directives configuration file (default: `../../conf/rules.json`)
 - `SHUTDOWN_TIMEOUT`: Server shutdown timeout (default: `3s`)
 
-### Rules File Format
+### Directives File Format
 
-Rules are defined in JSON format:
+Directives are defined in JSON format:
 ```json
 [
   {

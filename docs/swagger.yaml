@@ -8,12 +8,12 @@ info:
     email: churiver@outlook.com
     name: R1v3r
     url: http://localhost/support
-  description: This is a rule engine server.
+  description: This is an ivy engine server.
   license:
     name: MIT License
     url: https://www.mit.edu/~amini/LICENSE.md
   termsOfService: http://localhost/terms/
-  title: R1v3r's rule engine
+  title: R1v3r's ivy engine
   version: "1.0"
 paths:
   /ping:

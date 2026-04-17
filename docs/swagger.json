@@ -1,8 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "This is a rule engine server.",
-        "title": "R1v3r's rule engine",
+        "description": "This is an ivy engine server.",
+        "title": "R1v3r's ivy engine",
         "termsOfService": "http://localhost/terms/",
         "contact": {
             "name": "R1v3r",

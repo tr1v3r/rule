@@ -1,14 +1,14 @@
-package rule
+package ivy
 
 import (
 	"context"
 	"fmt"
 	"time"
 
-	"github.com/tr1v3r/rule/driver"
+	"github.com/tr1v3r/ivy/driver"
 )
 
-// NewForest build a new forest and return it
+// NewForest builds a new forest and returns it.
 func NewForest(builders ...TreeBuilder) Forest {
 	return (&forest{
 		m:        make(map[string]Tree, len(builders)),
@@ -17,128 +17,128 @@ func NewForest(builders ...TreeBuilder) Forest {
 	}).Build()
 }
 
-// NewJSONTree build a json rule tree
-func NewJSONTree[R Rule](name, template string, rules ...R) (Tree, error) {
-	return NewTree(driver.NewJSONDriver(), name, template, rules...)
+// NewJSONTree builds a JSON tree.
+func NewJSONTree[R Directive](name, template string, directives ...R) (Tree, error) {
+	return NewTree(driver.NewJSONDriver(), name, template, directives...)
 }
 
-// NewLazyJSONTree build a lazy json rule tree
-func NewLazyJSONTree[R Rule](name, template string, rules ...R) (Tree, error) {
-	return NewLazyTree(driver.NewJSONDriver(), name, template, rules...)
+// NewLazyJSONTree builds a lazy JSON tree.
+func NewLazyJSONTree[R Directive](name, template string, directives ...R) (Tree, error) {
+	return NewLazyTree(driver.NewJSONDriver(), name, template, directives...)
 }
 
-// NewLazyInstantJSONTree build a lazy instant json rule tree
-func NewLazyInstantJSONTree[R Rule](name, template string, rules ...R) (Tree, error) {
-	return NewLazyInstantTree(driver.NewJSONDriver(), name, template, rules...)
+// NewLazyInstantJSONTree builds a lazy instant JSON tree.
+func NewLazyInstantJSONTree[R Directive](name, template string, directives ...R) (Tree, error) {
+	return NewLazyInstantTree(driver.NewJSONDriver(), name, template, directives...)
 }
 
-// NewLazyCacheJSONTree build a lazy json rule tree with cache TTL
-func NewLazyCacheJSONTree[R Rule](name, template string, ttl time.Duration, rules ...R) (Tree, error) {
-	return NewLazyCacheTree(driver.NewJSONDriver(), name, template, ttl, rules...)
+// NewLazyCacheJSONTree builds a lazy JSON tree with cache TTL.
+func NewLazyCacheJSONTree[R Directive](name, template string, ttl time.Duration, directives ...R) (Tree, error) {
+	return NewLazyCacheTree(driver.NewJSONDriver(), name, template, ttl, directives...)
 }
 
-// NewYAMLTree build a yaml rule tree
-func NewYAMLTree[R Rule](name, template string, rules ...R) (Tree, error) {
-	return NewTree(driver.NewYAMLDriver(), name, template, rules...)
+// NewYAMLTree builds a YAML tree.
+func NewYAMLTree[R Directive](name, template string, directives ...R) (Tree, error) {
+	return NewTree(driver.NewYAMLDriver(), name, template, directives...)
 }
 
-// NewLazyYAMLTree build a yaml rule tree
-func NewLazyYAMLTree[R Rule](name, template string, rules ...R) (Tree, error) {
-	return NewLazyTree(driver.NewYAMLDriver(), name, template, rules...)
+// NewLazyYAMLTree builds a lazy YAML tree.
+func NewLazyYAMLTree[R Directive](name, template string, directives ...R) (Tree, error) {
+	return NewLazyTree(driver.NewYAMLDriver(), name, template, directives...)
 }
 
-// NewLazyInstantYAMLTree build a yaml instant rule tree
-func NewLazyInstantYAMLTree[R Rule](name, template string, rules ...R) (Tree, error) {
-	return NewLazyInstantTree(driver.NewYAMLDriver(), name, template, rules...)
+// NewLazyInstantYAMLTree builds a lazy instant YAML tree.
+func NewLazyInstantYAMLTree[R Directive](name, template string, directives ...R) (Tree, error) {
+	return NewLazyInstantTree(driver.NewYAMLDriver(), name, template, directives...)
 }
 
-// NewLazyCacheYAMLTree build a lazy yaml rule tree with cache TTL
-func NewLazyCacheYAMLTree[R Rule](name, template string, ttl time.Duration, rules ...R) (Tree, error) {
-	return NewLazyCacheTree(driver.NewYAMLDriver(), name, template, ttl, rules...)
+// NewLazyCacheYAMLTree builds a lazy YAML tree with cache TTL.
+func NewLazyCacheYAMLTree[R Directive](name, template string, ttl time.Duration, directives ...R) (Tree, error) {
+	return NewLazyCacheTree(driver.NewYAMLDriver(), name, template, ttl, directives...)
 }
 
-// NewTileTree build a tree with tile children
-func NewTileTree[R Rule](name, template string, rules ...R) (Tree, error) {
-	return NewTree(driver.NewTileDriver(), name, template, rules...)
+// NewTileTree builds a tile tree.
+func NewTileTree[R Directive](name, template string, directives ...R) (Tree, error) {
+	return NewTree(driver.NewTileDriver(), name, template, directives...)
 }
 
-// NewLazyTileTree build a tree with tile children in lazy mode
-func NewLazyTileTree[R Rule](name, template string, rules ...R) (Tree, error) {
-	return NewLazyTree(driver.NewTileDriver(), name, template, rules...)
+// NewLazyTileTree builds a lazy tile tree.
+func NewLazyTileTree[R Directive](name, template string, directives ...R) (Tree, error) {
+	return NewLazyTree(driver.NewTileDriver(), name, template, directives...)
 }
 
-// NewLazyInstantTileTree build a tree with tile children in lazy instant mode
-func NewLazyInstantTileTree[R Rule](name, template string, rules ...R) (Tree, error) {
-	return NewLazyInstantTree(driver.NewTileDriver(), name, template, rules...)
+// NewLazyInstantTileTree builds a lazy instant tile tree.
+func NewLazyInstantTileTree[R Directive](name, template string, directives ...R) (Tree, error) {
+	return NewLazyInstantTree(driver.NewTileDriver(), name, template, directives...)
 }
 
-// NewLazyCacheTileTree build a tree with tile children in lazy cache mode
-func NewLazyCacheTileTree[R Rule](name, template string, ttl time.Duration, rules ...R) (Tree, error) {
-	return NewLazyCacheTree(driver.NewTileDriver(), name, template, ttl, rules...)
+// NewLazyCacheTileTree builds a lazy cache tile tree.
+func NewLazyCacheTileTree[R Directive](name, template string, ttl time.Duration, directives ...R) (Tree, error) {
+	return NewLazyCacheTree(driver.NewTileDriver(), name, template, ttl, directives...)
 }
 
-// NewXMLTree build an xml rule tree
-func NewXMLTree[R Rule](name, template string, rules ...R) (Tree, error) {
-	return NewTree(driver.NewXMLDriver(), name, template, rules...)
+// NewXMLTree builds an XML tree.
+func NewXMLTree[R Directive](name, template string, directives ...R) (Tree, error) {
+	return NewTree(driver.NewXMLDriver(), name, template, directives...)
 }
 
-// NewLazyXMLTree build a lazy xml rule tree
-func NewLazyXMLTree[R Rule](name, template string, rules ...R) (Tree, error) {
-	return NewLazyTree(driver.NewXMLDriver(), name, template, rules...)
+// NewLazyXMLTree builds a lazy XML tree.
+func NewLazyXMLTree[R Directive](name, template string, directives ...R) (Tree, error) {
+	return NewLazyTree(driver.NewXMLDriver(), name, template, directives...)
 }
 
-// NewLazyInstantXMLTree build a lazy instant xml rule tree
-func NewLazyInstantXMLTree[R Rule](name, template string, rules ...R) (Tree, error) {
-	return NewLazyInstantTree(driver.NewXMLDriver(), name, template, rules...)
+// NewLazyInstantXMLTree builds a lazy instant XML tree.
+func NewLazyInstantXMLTree[R Directive](name, template string, directives ...R) (Tree, error) {
+	return NewLazyInstantTree(driver.NewXMLDriver(), name, template, directives...)
 }
 
-// NewLazyCacheXMLTree build a lazy xml rule tree with cache TTL
-func NewLazyCacheXMLTree[R Rule](name, template string, ttl time.Duration, rules ...R) (Tree, error) {
-	return NewLazyCacheTree(driver.NewXMLDriver(), name, template, ttl, rules...)
+// NewLazyCacheXMLTree builds a lazy XML tree with cache TTL.
+func NewLazyCacheXMLTree[R Directive](name, template string, ttl time.Duration, directives ...R) (Tree, error) {
+	return NewLazyCacheTree(driver.NewXMLDriver(), name, template, ttl, directives...)
 }
 
-// NewTOMLTree build a toml rule tree
-func NewTOMLTree[R Rule](name, template string, rules ...R) (Tree, error) {
-	return NewTree(driver.NewTOMLDriver(), name, template, rules...)
+// NewTOMLTree builds a TOML tree.
+func NewTOMLTree[R Directive](name, template string, directives ...R) (Tree, error) {
+	return NewTree(driver.NewTOMLDriver(), name, template, directives...)
 }
 
-// NewLazyTOMLTree build a lazy toml rule tree
-func NewLazyTOMLTree[R Rule](name, template string, rules ...R) (Tree, error) {
-	return NewLazyTree(driver.NewTOMLDriver(), name, template, rules...)
+// NewLazyTOMLTree builds a lazy TOML tree.
+func NewLazyTOMLTree[R Directive](name, template string, directives ...R) (Tree, error) {
+	return NewLazyTree(driver.NewTOMLDriver(), name, template, directives...)
 }
 
-// NewLazyInstantTOMLTree build a lazy instant toml rule tree
-func NewLazyInstantTOMLTree[R Rule](name, template string, rules ...R) (Tree, error) {
-	return NewLazyInstantTree(driver.NewTOMLDriver(), name, template, rules...)
+// NewLazyInstantTOMLTree builds a lazy instant TOML tree.
+func NewLazyInstantTOMLTree[R Directive](name, template string, directives ...R) (Tree, error) {
+	return NewLazyInstantTree(driver.NewTOMLDriver(), name, template, directives...)
 }
 
-// NewLazyCacheTOMLTree build a lazy toml rule tree with cache TTL
-func NewLazyCacheTOMLTree[R Rule](name, template string, ttl time.Duration, rules ...R) (Tree, error) {
-	return NewLazyCacheTree(driver.NewTOMLDriver(), name, template, ttl, rules...)
+// NewLazyCacheTOMLTree builds a lazy TOML tree with cache TTL.
+func NewLazyCacheTOMLTree[R Directive](name, template string, ttl time.Duration, directives ...R) (Tree, error) {
+	return NewLazyCacheTree(driver.NewTOMLDriver(), name, template, ttl, directives...)
 }
 
-// NewTree build a rule tree.
-func NewTree[R Rule](driver driver.Driver, name, template string, rules ...R) (Tree, error) {
-	return buildTree(newTree[R](driver, name, template), toA(rules...)...)
+// NewTree builds a standard tree.
+func NewTree[R Directive](driver driver.Driver, name, template string, directives ...R) (Tree, error) {
+	return buildTree(newTree[R](driver, name, template), toA(directives...)...)
 }
 
-// NewLazyTree build a lazy rule tree.
-func NewLazyTree[R Rule](driver driver.Driver, name, template string, rules ...R) (Tree, error) {
-	return buildTree(newTree[R](driver, name, template).lazy(), toA(rules...)...)
+// NewLazyTree builds a lazy tree.
+func NewLazyTree[R Directive](driver driver.Driver, name, template string, directives ...R) (Tree, error) {
+	return buildTree(newTree[R](driver, name, template).lazy(), toA(directives...)...)
 }
 
-// NewLazyInstantTree build a lazy instant rule tree.
-func NewLazyInstantTree[R Rule](driver driver.Driver, name, template string, rules ...R) (Tree, error) {
-	return buildTree(newTree[R](driver, name, template).lazy().instant(), toA(rules...)...)
+// NewLazyInstantTree builds a lazy instant tree.
+func NewLazyInstantTree[R Directive](driver driver.Driver, name, template string, directives ...R) (Tree, error) {
+	return buildTree(newTree[R](driver, name, template).lazy().instant(), toA(directives...)...)
 }
 
-// NewLazyCacheTree build a lazy rule tree with cache TTL.
+// NewLazyCacheTree builds a lazy tree with cache TTL.
 // After the TTL expires, the next Get() triggers re-realization.
-func NewLazyCacheTree[R Rule](driver driver.Driver, name, template string, ttl time.Duration, rules ...R) (Tree, error) {
-	return buildTree(newTree[R](driver, name, template).lazy().cache(ttl), toA(rules...)...)
+func NewLazyCacheTree[R Directive](driver driver.Driver, name, template string, ttl time.Duration, directives ...R) (Tree, error) {
+	return buildTree(newTree[R](driver, name, template).lazy().cache(ttl), toA(directives...)...)
 }
 
-func newTree[R Rule](diver driver.Driver, name, template string) *tree {
+func newTree[R Directive](diver driver.Driver, name, template string) *tree {
 	return &tree{
 		name: name,
 
@@ -149,17 +149,17 @@ func newTree[R Rule](diver driver.Driver, name, template string) *tree {
 		children: make(map[string]Tree),
 	}
 }
-func buildTree(tree *tree, rules ...Rule) (Tree, error) {
-	if err := tree.build(rules...); err != nil {
+func buildTree(tree *tree, directives ...Directive) (Tree, error) {
+	if err := tree.build(directives...); err != nil {
 		return nil, fmt.Errorf("build tree fail: %w", err)
 	}
 	return tree, nil
 }
-func toA[R Rule](rules ...R) (ruleArray []Rule) {
-	for _, rule := range rules {
-		ruleArray = append(ruleArray, rule)
+func toA[R Directive](directives ...R) (arr []Directive) {
+	for _, d := range directives {
+		arr = append(arr, d)
 	}
 	return
 }
 
-func NewRule(path string, Processors ...driver.Processor) Rule { return &rule{path, Processors} }
+func NewDirective(path string, Processors ...driver.Processor) Directive { return &directive{path, Processors} }

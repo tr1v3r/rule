@@ -1,4 +1,4 @@
-module github.com/tr1v3r/rule
+module github.com/tr1v3r/ivy
 
 go 1.20
 

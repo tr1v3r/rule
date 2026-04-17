@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/tr1v3r/rule/driver"
+	"github.com/tr1v3r/ivy/driver"
 )
 
 func Test_Rule(t *testing.T) {

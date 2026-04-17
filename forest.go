@@ -1,4 +1,4 @@
-package rule
+package ivy
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"github.com/tr1v3r/pkg/log"
 	"golang.org/x/time/rate"
 
-	"github.com/tr1v3r/rule/driver"
+	"github.com/tr1v3r/ivy/driver"
 )
 
 var _ Forest = (*forest)(nil)

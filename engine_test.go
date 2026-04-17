@@ -1,4 +1,4 @@
-package rule
+package ivy
 
 import (
 	"encoding/json"
@@ -8,15 +8,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/tr1v3r/rule/driver"
+	"github.com/tr1v3r/ivy/driver"
 )
 
 func TestBuildTree(t *testing.T) {
 	var testcases = []struct {
-		Rules    []*rule
+		Rules    []*directive
 		Expected string
 	}{
-		{Rules: []*rule{
+		{Rules: []*directive{
 			{path: "/a/b/c/d"},
 			{path: "/a/b/c"},
 			{path: "/"},
@@ -80,7 +80,7 @@ func TestForest_run(t *testing.T) {
 func InitForest(t *testing.T) Forest {
 	var builders []TreeBuilder = []TreeBuilder{
 		func() Tree {
-			var rules = []*rule{
+			var rules = []*directive{
 				{path: "/", processors: []driver.Processor{
 					&driver.JSONProcessor{T: "create", JSONPath: "author.first", V: []byte("river")},
 					&driver.JSONProcessor{T: "create", JSONPath: "name", V: []byte("root")},
@@ -115,7 +115,7 @@ func InitForest(t *testing.T) Forest {
 			return tree
 		},
 		func() Tree {
-			var rules = []*rule{
+			var rules = []*directive{
 				{path: "/a/b/c/d", processors: nil},
 				{path: "/a/b/c", processors: nil},
 				{path: "/", processors: []driver.Processor{&driver.CURLProcessor{URL: "https://xxx/ping"}}},
@@ -158,7 +158,7 @@ func TestLazyCacheTree_TTLExpiry(t *testing.T) {
 			driver.DummyDriver
 		}{Modem: driver.DummyModem, PathParser: driver.SlashPathParser},
 		"cache_test", `{}`, 50*time.Millisecond,
-		NewRule("/", incrementProcessor),
+		NewDirective("/", incrementProcessor),
 	)
 	if err != nil {
 		t.Fatalf("build tree fail: %s", err)
@@ -212,7 +212,7 @@ func TestLazyCacheTree_ZeroTTL(t *testing.T) {
 			driver.DummyDriver
 		}{Modem: driver.DummyModem, PathParser: driver.SlashPathParser},
 		"zero_ttl_test", `{"v":0}`, 0,
-		NewRule("/", &driver.JSONProcessor{T: "create", JSONPath: "v", V: []byte("1")}),
+		NewDirective("/", &driver.JSONProcessor{T: "create", JSONPath: "v", V: []byte("1")}),
 	)
 	if err != nil {
 		t.Fatalf("build tree fail: %s", err)
@@ -261,7 +261,7 @@ func TestTree_GetWithContext(t *testing.T) {
 			driver.DummyDriver
 		}{Modem: driver.DummyModem, PathParser: driver.SlashPathParser},
 		"ctx_test", `{}`,
-		NewRule("/a/b", proc),
+		NewDirective("/a/b", proc),
 	)
 	if err != nil {
 		t.Fatalf("build tree fail: %s", err)
@@ -328,7 +328,7 @@ func TestTree_Fallback(t *testing.T) {
 			driver.DummyDriver
 		}{Modem: driver.DummyModem, PathParser: driver.SlashPathParser},
 		"fallback_test", `{"base":true}`,
-		NewRule("/", &driver.JSONProcessor{T: "create", JSONPath: "root", V: []byte("yes")}),
+		NewDirective("/", &driver.JSONProcessor{T: "create", JSONPath: "root", V: []byte("yes")}),
 	)
 	if err != nil {
 		t.Fatalf("build tree fail: %s", err)
@@ -378,7 +378,7 @@ func TestTree_FallbackWithContext(t *testing.T) {
 			driver.DummyDriver
 		}{Modem: driver.DummyModem, PathParser: driver.SlashPathParser},
 		"ctx_fallback_test", `{}`,
-		NewRule("/", &driver.JSONProcessor{T: "create", JSONPath: "v", V: []byte("1")}),
+		NewDirective("/", &driver.JSONProcessor{T: "create", JSONPath: "v", V: []byte("1")}),
 	)
 	if err != nil {
 		t.Fatalf("build tree fail: %s", err)
@@ -425,7 +425,7 @@ func TestCombineProcessor_WithFallback(t *testing.T) {
 		&driver.JSONProcessor{T: "create", JSONPath: "extra", V: []byte("data")},
 	)
 
-	tree, err := NewTree[*rule](
+	tree, err := NewTree[*directive](
 		&struct {
 			driver.Modem
 			driver.PathParser

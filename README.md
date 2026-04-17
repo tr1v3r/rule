@@ -1,5 +1,5 @@
-# rule
-Rule engine
+# ivy
+Hierarchical content-construction engine
 
 
 - TODO:

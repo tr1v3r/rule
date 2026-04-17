@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tr1v3r/rule/driver"
+	"github.com/tr1v3r/ivy/driver"
 )
 
 func TestXMLDriver(t *testing.T) {

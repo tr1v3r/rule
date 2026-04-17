@@ -1,32 +1,32 @@
-package rule
+package ivy
 
 import (
 	"time"
 
 	"golang.org/x/time/rate"
 
-	"github.com/tr1v3r/rule/driver"
+	"github.com/tr1v3r/ivy/driver"
 )
 
-// Forest rule forest
+// Forest manages a collection of trees.
 type Forest interface {
 	Register(...TreeBuilder)
 	Append(...TreeBuilder) Forest
 
 	Build() Forest
-	// Refresh refresh Forest
-	// interval is optional and only first value is useful when set
-	// blocks when the interval is set
+	// Refresh refreshes all trees.
+	// interval is optional and only first value is useful when set.
+	// Blocks when the interval is set.
 	Refresh(interval ...time.Duration)
-	// RefreshTree refresh specified tree
+	// RefreshTree refreshes the specified tree.
 	RefreshTree(name string)
 
 	Get(name string) Tree
 	Set(tree Tree)
-	// GetVal get value from tree
-	GetVal(treeName, path string) (rule []byte, err error)
+	// GetVal retrieves a value from the named tree at the given path.
+	GetVal(treeName, path string) (val []byte, err error)
 	// GetValWithContext retrieves a value with runtime context.
-	GetValWithContext(rc *driver.RuleContext, treeName, path string) (rule []byte, err error)
+	GetValWithContext(rc *driver.RuleContext, treeName, path string) (val []byte, err error)
 
 	Info() string
 
@@ -37,30 +37,30 @@ type Forest interface {
 	SetDefaultContext(rc *driver.RuleContext)
 }
 
-// Tree rule tree
+// Tree is a hierarchical node structure with path-based access.
 type Tree interface {
-	// Name return tree name
+	// Name returns the tree name.
 	Name() string
-	// Path return tree path in root tree
-	// return "" when tree is root tree
+	// Path returns the tree path in the root tree.
+	// Returns "" when the tree is the root tree.
 	Path() string
 
-	// Set add a rule node to tree or update rule node.
-	Set(Rule) error
-	// Get query rule from tree by path
-	Get(path string) (rule []byte, err error)
-	// GetWithContext retrieves rule data with runtime context for dynamic construction.
-	GetWithContext(rc *driver.RuleContext, path string) (rule []byte, err error)
+	// Set adds or updates a directive on the tree.
+	Set(Directive) error
+	// Get retrieves the value at the given path.
+	Get(path string) (val []byte, err error)
+	// GetWithContext retrieves a value with runtime context for dynamic construction.
+	GetWithContext(rc *driver.RuleContext, path string) (val []byte, err error)
 
-	// Has check if has tree node for path
+	// Has checks if a node exists at the given path.
 	Has(path string) bool
-	// Del delete tree node in tree
+	// Del deletes a node at the given path.
 	Del(path string) error
 
-	// Graft graft a sub tree
+	// Graft attaches a sub-tree.
 	Graft(Tree)
 
-	// ShowStruct return tree info
+	// ShowStruct returns the tree structure as JSON.
 	ShowStruct() []byte
 
 	// SetRateLimit sets a rate limit for Get calls on this tree.
@@ -75,10 +75,10 @@ type Tree interface {
 	SetDefaultContext(rc *driver.RuleContext)
 }
 
-// Rule rule for tree
-type Rule interface {
-	// return path of rule
+// Directive defines a path and the processors to apply at that path.
+type Directive interface {
+	// Path returns the path this directive applies to.
 	Path() string
-	// return processor on this rule
+	// Processors returns the processors for this directive.
 	Processors() []driver.Processor
 }

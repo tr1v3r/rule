@@ -1,16 +1,16 @@
-package rule_test
+package ivy_test
 
 import (
 	"testing"
 
 	"github.com/tr1v3r/stream"
 
-	"github.com/tr1v3r/rule"
-	"github.com/tr1v3r/rule/driver"
+	"github.com/tr1v3r/ivy"
+	"github.com/tr1v3r/ivy/driver"
 )
 
 func TestBuildTree_curl_single(t *testing.T) {
-	tree, err := rule.NewYAMLTree("qq", "", rule.NewRule("/", &driver.CURLProcessor{URL: "https://qq.com"}))
+	tree, err := ivy.NewYAMLTree("qq", "", ivy.NewDirective("/", &driver.CURLProcessor{URL: "https://qq.com"}))
 	if err != nil {
 		t.Errorf("build tree fail: %s", err)
 	}
@@ -19,8 +19,8 @@ func TestBuildTree_curl_single(t *testing.T) {
 }
 
 func TestBuildForest_curl_tree(t *testing.T) {
-	f := rule.NewForest(func() rule.Tree {
-		tree, err := rule.NewYAMLTree("qq", "", rule.NewRule("/", &driver.CURLProcessor{URL: "https://qq.com"}))
+	f := ivy.NewForest(func() ivy.Tree {
+		tree, err := ivy.NewYAMLTree("qq", "", ivy.NewDirective("/", &driver.CURLProcessor{URL: "https://qq.com"}))
 		if err != nil {
 			t.Errorf("build tree fail: %s", err)
 			return nil
@@ -35,15 +35,15 @@ func TestBuildForest_curl_tree(t *testing.T) {
 
 func TestBuildForest_stream(t *testing.T) {
 	trees := stream.SliceOf("https://qq.com", "https://163.com").Parallel(64).Convert(func(url string) any {
-		tree, _ := rule.NewYAMLTree("url", "", rule.NewRule("/", &driver.CURLProcessor{URL: url}))
+		tree, _ := ivy.NewYAMLTree("url", "", ivy.NewDirective("/", &driver.CURLProcessor{URL: url}))
 		return tree
 	}).Collect(func(trees ...any) any {
-		var treesArray []rule.Tree
+		var treesArray []ivy.Tree
 		for _, tree := range trees {
-			treesArray = append(treesArray, tree.(rule.Tree))
+			treesArray = append(treesArray, tree.(ivy.Tree))
 		}
 		return treesArray
-	}).([]rule.Tree)
+	}).([]ivy.Tree)
 
 	for i, tree := range trees {
 		rule, _ := tree.Get("")
@@ -58,12 +58,12 @@ func TestTileTree(t *testing.T) {
 		}
 	}
 
-	// tree, err := rule.NewTileTree("test_tile_tree", "template",
-	tree, err := rule.NewLazyTileTree("test_tile_tree", "template",
-		rule.NewRule("/abc", &driver.RawProcessor{Proc: proc("content1")}),
-		rule.NewRule("/123", &driver.RawProcessor{Proc: proc("content2")}),
-		rule.NewRule("/test", &driver.RawProcessor{Proc: proc("content3")}),
-		rule.NewRule("/@@@", &driver.RawProcessor{Proc: proc("content4")}),
+	// tree, err := ivy.NewTileTree("test_tile_tree", "template",
+	tree, err := ivy.NewLazyTileTree("test_tile_tree", "template",
+		ivy.NewDirective("/abc", &driver.RawProcessor{Proc: proc("content1")}),
+		ivy.NewDirective("/123", &driver.RawProcessor{Proc: proc("content2")}),
+		ivy.NewDirective("/test", &driver.RawProcessor{Proc: proc("content3")}),
+		ivy.NewDirective("/@@@", &driver.RawProcessor{Proc: proc("content4")}),
 	)
 	if err != nil {
 		t.Errorf("build tile tree fail: %s", err)

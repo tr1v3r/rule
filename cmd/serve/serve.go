@@ -10,15 +10,15 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger" // gin-swagger middleware
 	"github.com/tr1v3r/pkg/log"
 
-	"github.com/tr1v3r/rule"
-	_ "github.com/tr1v3r/rule/docs"
-	"github.com/tr1v3r/rule/driver"
-	"github.com/tr1v3r/rule/web"
+	"github.com/tr1v3r/ivy"
+	_ "github.com/tr1v3r/ivy/docs"
+	"github.com/tr1v3r/ivy/driver"
+	"github.com/tr1v3r/ivy/web"
 )
 
-//	@title			R1v3r's rule engine
+//	@title			R1v3r's ivy engine
 //	@version		1.0
-//	@description	This is a rule engine server.
+//	@description	This is an ivy engine server.
 //	@termsOfService	http://localhost/terms/
 
 //	@contact.name	R1v3r
@@ -75,7 +75,7 @@ type RuleDataItem struct {
 	} `json:"Processors"`
 }
 
-func load() (rules []rule.Rule) {
+func load() (directives []ivy.Directive) {
 	var filename = os.Getenv("RULES_FILE")
 	if filename == "" {
 		filename = defaultFilename
@@ -114,7 +114,7 @@ func load() (rules []rule.Rule) {
 			}
 			ops = append(ops, op)
 		}
-		rules = append(rules, rule.NewRule(line.Path, ops...))
+		directives = append(directives, ivy.NewDirective(line.Path, ops...))
 	}
-	return rules
+	return directives
 }
