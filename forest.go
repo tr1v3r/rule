@@ -114,7 +114,7 @@ func (f *forest) GetVal(treeName, path string) (rule []byte, err error) {
 }
 
 // GetValWithContext get value from tree with context
-func (f *forest) GetValWithContext(rc *driver.RuleContext, treeName, path string) (rule []byte, err error) {
+func (f *forest) GetValWithContext(rc *driver.RealizeContext, treeName, path string) (rule []byte, err error) {
 	tree := f.Get(treeName)
 	if tree == nil {
 		return nil, ErrNotExistsTree
@@ -142,8 +142,8 @@ func (f *forest) SetRateLimit(r rate.Limit, burst int) {
 	f.rateLimiter = rate.NewLimiter(r, burst)
 }
 
-// SetDefaultContext sets the default RuleContext on all trees in the forest.
-func (f *forest) SetDefaultContext(rc *driver.RuleContext) {
+// SetDefaultContext sets the default RealizeContext on all trees in the forest.
+func (f *forest) SetDefaultContext(rc *driver.RealizeContext) {
 	f.mu.RLock()
 	defer f.mu.RUnlock()
 	for _, t := range f.m {

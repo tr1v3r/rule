@@ -62,7 +62,7 @@ type tree struct {
 	rlMu        sync.RWMutex
 	rateLimiter *rate.Limiter
 
-	defaultCtx *driver.RuleContext
+	defaultCtx *driver.RealizeContext
 }
 
 func (t *tree) lazy() *tree {
@@ -153,7 +153,7 @@ func (t *tree) Get(path string) ([]byte, error) {
 }
 
 // GetWithContext retrieves rule data with runtime context for dynamic construction.
-func (t *tree) GetWithContext(rc *driver.RuleContext, path string) ([]byte, error) {
+func (t *tree) GetWithContext(rc *driver.RealizeContext, path string) ([]byte, error) {
 	if t == nil {
 		return nil, ErrNotExistsTree
 	}
@@ -172,7 +172,7 @@ func (t *tree) GetWithContext(rc *driver.RuleContext, path string) ([]byte, erro
 }
 
 // doFallback calls the fallback processor if set, otherwise returns content unchanged.
-func (t *tree) doFallback(rc *driver.RuleContext, content []byte) ([]byte, error) {
+func (t *tree) doFallback(rc *driver.RealizeContext, content []byte) ([]byte, error) {
 	if t.fallback == nil {
 		return content, nil
 	}
@@ -192,8 +192,8 @@ func (t *tree) SetFallback(proc driver.Processor) {
 	}
 }
 
-// SetDefaultContext sets the default RuleContext for this tree and all subtrees.
-func (t *tree) SetDefaultContext(rc *driver.RuleContext) {
+// SetDefaultContext sets the default RealizeContext for this tree and all subtrees.
+func (t *tree) SetDefaultContext(rc *driver.RealizeContext) {
 	t.defaultCtx = rc
 	t.mu.RLock()
 	defer t.mu.RUnlock()
@@ -324,7 +324,7 @@ func (t *tree) realize(procs []driver.Processor) error {
 	return t.realizeWithContext(t.defaultCtx, procs)
 }
 
-func (t *tree) realizeWithContext(rc *driver.RuleContext, procs []driver.Processor) error {
+func (t *tree) realizeWithContext(rc *driver.RealizeContext, procs []driver.Processor) error {
 	if rc == nil {
 		rc = t.defaultCtx
 	}

@@ -11,7 +11,7 @@ type RawProcessor struct {
 	author    string
 	createdAt time.Time
 
-	Proc func(ctx *RuleContext, before []byte) (after []byte, err error)
+	Proc func(ctx *RealizeContext, before []byte) (after []byte, err error)
 }
 
 func (op *RawProcessor) Type() string           { return "" }
@@ -20,7 +20,7 @@ func (op *RawProcessor) Author() string         { return op.author }
 func (op *RawProcessor) CreatedAt() time.Time   { return op.createdAt }
 func (op *RawProcessor) Load(data []byte) error { return ErrSerializeNotSupport }
 func (op *RawProcessor) Save() []byte           { return nil }
-func (op *RawProcessor) Process(ctx *RuleContext, before []byte) (after []byte, err error) {
+func (op *RawProcessor) Process(ctx *RealizeContext, before []byte) (after []byte, err error) {
 	return op.Proc(ctx, before)
 }
 
@@ -45,7 +45,7 @@ func (c *CombinedProcessor) Author() string       { return c.author }
 func (c *CombinedProcessor) CreatedAt() time.Time { return c.createdAt }
 func (c *CombinedProcessor) Load([]byte) error    { return ErrSerializeNotSupport }
 func (c *CombinedProcessor) Save() []byte         { return nil }
-func (c *CombinedProcessor) Process(rc *RuleContext, before []byte) ([]byte, error) {
+func (c *CombinedProcessor) Process(rc *RealizeContext, before []byte) ([]byte, error) {
 	var err error
 	for _, proc := range c.procs {
 		if proc == nil {

@@ -144,7 +144,7 @@ func TestLazyCacheTree_TTLExpiry(t *testing.T) {
 
 	// Use a processor that produces different output each time to detect re-realization
 	incrementProcessor := &driver.RawProcessor{
-		Proc: func(_ *driver.RuleContext, before []byte) ([]byte, error) {
+		Proc: func(_ *driver.RealizeContext, before []byte) ([]byte, error) {
 			n := atomic.AddInt32(&realizeCount, 1)
 			return fmt.Appendf(nil, `{"realize":%d}`, n), nil
 		},
@@ -227,10 +227,10 @@ func TestLazyCacheTree_ZeroTTL(t *testing.T) {
 }
 
 func TestRealizeWithContext_Dispatch(t *testing.T) {
-	var gotRC *driver.RuleContext
+	var gotRC *driver.RealizeContext
 
 	proc := &driver.RawProcessor{
-		Proc: func(_ *driver.RuleContext, before []byte) ([]byte, error) {
+		Proc: func(_ *driver.RealizeContext, before []byte) ([]byte, error) {
 			return append(before, []byte("_ctx")...), nil
 		},
 	}
@@ -238,7 +238,7 @@ func TestRealizeWithContext_Dispatch(t *testing.T) {
 	plainProc := &driver.JSONProcessor{T: "create", JSONPath: "key", V: []byte("val")}
 
 	r := new(driver.StdRealizer)
-	rc := &driver.RuleContext{Params: map[string]string{"foo": "bar"}}
+	rc := &driver.RealizeContext{Params: map[string]string{"foo": "bar"}}
 	result, err := r.Realize(rc, []byte("{}"), proc, plainProc)
 	if err != nil {
 		t.Fatalf("Realize fail: %s", err)
@@ -249,9 +249,9 @@ func TestRealizeWithContext_Dispatch(t *testing.T) {
 }
 
 func TestTree_GetWithContext(t *testing.T) {
-	var gotRC *driver.RuleContext
+	var gotRC *driver.RealizeContext
 
-	proc := &contextCapturingProcessor{capture: func(rc *driver.RuleContext) { gotRC = rc }}
+	proc := &contextCapturingProcessor{capture: func(rc *driver.RealizeContext) { gotRC = rc }}
 
 	tree, err := NewLazyTree(
 		&struct {
@@ -267,7 +267,7 @@ func TestTree_GetWithContext(t *testing.T) {
 		t.Fatalf("build tree fail: %s", err)
 	}
 
-	rc := driver.RuleContext{Params: map[string]string{"user": "alice"}}
+	rc := driver.RealizeContext{Params: map[string]string{"user": "alice"}}
 	result, err := tree.GetWithContext(&rc, "/a/b")
 	if err != nil {
 		t.Fatalf("GetWithContext fail: %s", err)
@@ -283,9 +283,9 @@ func TestTree_GetWithContext(t *testing.T) {
 	t.Logf("got result: %s", result)
 }
 
-// contextCapturingProcessor is a test processor that captures the RuleContext
+// contextCapturingProcessor is a test processor that captures the RealizeContext
 type contextCapturingProcessor struct {
-	capture func(*driver.RuleContext)
+	capture func(*driver.RealizeContext)
 }
 
 func (p *contextCapturingProcessor) Type() string                                    { return "test" }
@@ -294,7 +294,7 @@ func (p *contextCapturingProcessor) Author() string                             
 func (p *contextCapturingProcessor) CreatedAt() time.Time                            { return time.Time{} }
 func (p *contextCapturingProcessor) Load([]byte) error                               { return nil }
 func (p *contextCapturingProcessor) Save() []byte                                    { return nil }
-func (p *contextCapturingProcessor) Process(rc *driver.RuleContext, before []byte) ([]byte, error) {
+func (p *contextCapturingProcessor) Process(rc *driver.RealizeContext, before []byte) ([]byte, error) {
 	if p.capture != nil {
 		p.capture(rc)
 	}
@@ -303,7 +303,7 @@ func (p *contextCapturingProcessor) Process(rc *driver.RuleContext, before []byt
 
 func TestRawProcessor_Fallback(t *testing.T) {
 	proc := &driver.RawProcessor{
-		Proc: func(_ *driver.RuleContext, before []byte) ([]byte, error) {
+		Proc: func(_ *driver.RealizeContext, before []byte) ([]byte, error) {
 			return []byte("fallback"), nil
 		},
 	}
@@ -335,7 +335,7 @@ func TestTree_Fallback(t *testing.T) {
 	}
 
 	tree.SetFallback(&driver.RawProcessor{
-		Proc: func(_ *driver.RuleContext, before []byte) ([]byte, error) {
+		Proc: func(_ *driver.RealizeContext, before []byte) ([]byte, error) {
 			fallbackCalled = true
 			return append(before, []byte(`,"fallback":true}`)...), nil
 		},
@@ -368,7 +368,7 @@ func TestTree_Fallback(t *testing.T) {
 }
 
 func TestTree_FallbackWithContext(t *testing.T) {
-	var gotRC *driver.RuleContext
+	var gotRC *driver.RealizeContext
 
 	tree, err := NewTree(
 		&struct {
@@ -384,11 +384,11 @@ func TestTree_FallbackWithContext(t *testing.T) {
 		t.Fatalf("build tree fail: %s", err)
 	}
 
-	tree.SetFallback(&contextCapturingProcessor{capture: func(rc *driver.RuleContext) {
+	tree.SetFallback(&contextCapturingProcessor{capture: func(rc *driver.RealizeContext) {
 		gotRC = rc
 	}})
 
-	rc := &driver.RuleContext{Params: map[string]string{"user": "bob"}}
+	rc := &driver.RealizeContext{Params: map[string]string{"user": "bob"}}
 	_, err = tree.GetWithContext(rc, "/missing")
 	if err != nil {
 		t.Fatalf("GetWithContext fail: %s", err)

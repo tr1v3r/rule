@@ -101,7 +101,7 @@ func TestYAMLProcessor(t *testing.T) {
 	}
 
 	var ops = []driver.Processor{
-		&driver.RawProcessor{Proc: func(_ *driver.RuleContext, before []byte) ([]byte, error) {
+		&driver.RawProcessor{Proc: func(_ *driver.RealizeContext, before []byte) ([]byte, error) {
 			var result any
 			if err := yaml.Unmarshal([]byte(before), &result); err != nil {
 				return nil, fmt.Errorf("unmarshal rule fail: %w", err)
@@ -126,7 +126,7 @@ func TestTileDriver(t *testing.T) {
 
 	d := driver.NewTileDriver()
 
-	rule, err := d.Realize(nil, rule, &driver.RawProcessor{Proc: func(_ *driver.RuleContext, _ []byte) ([]byte, error) { return []byte("abc\ndef"), nil }})
+	rule, err := d.Realize(nil, rule, &driver.RawProcessor{Proc: func(_ *driver.RealizeContext, _ []byte) ([]byte, error) { return []byte("abc\ndef"), nil }})
 	if err != nil {
 		t.Errorf("realize fail: %s", rule)
 	}

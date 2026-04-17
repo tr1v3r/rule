@@ -26,15 +26,15 @@ type Forest interface {
 	// GetVal retrieves a value from the named tree at the given path.
 	GetVal(treeName, path string) (val []byte, err error)
 	// GetValWithContext retrieves a value with runtime context.
-	GetValWithContext(rc *driver.RuleContext, treeName, path string) (val []byte, err error)
+	GetValWithContext(rc *driver.RealizeContext, treeName, path string) (val []byte, err error)
 
 	Info() string
 
 	// SetRateLimit sets a global rate limit for all GetVal calls as a fallback.
 	SetRateLimit(r rate.Limit, burst int)
 
-	// SetDefaultContext sets the default RuleContext on all trees in the forest.
-	SetDefaultContext(rc *driver.RuleContext)
+	// SetDefaultContext sets the default RealizeContext on all trees in the forest.
+	SetDefaultContext(rc *driver.RealizeContext)
 }
 
 // Tree is a hierarchical node structure with path-based access.
@@ -50,7 +50,7 @@ type Tree interface {
 	// Get retrieves the value at the given path.
 	Get(path string) (val []byte, err error)
 	// GetWithContext retrieves a value with runtime context for dynamic construction.
-	GetWithContext(rc *driver.RuleContext, path string) (val []byte, err error)
+	GetWithContext(rc *driver.RealizeContext, path string) (val []byte, err error)
 
 	// Has checks if a node exists at the given path.
 	Has(path string) bool
@@ -70,9 +70,9 @@ type Tree interface {
 	// cannot find a matching child node.
 	SetFallback(proc driver.Processor)
 
-	// SetDefaultContext sets the default RuleContext used by realize when
+	// SetDefaultContext sets the default RealizeContext used by realize when
 	// no request-scoped context is provided (e.g. via Get or during build).
-	SetDefaultContext(rc *driver.RuleContext)
+	SetDefaultContext(rc *driver.RealizeContext)
 }
 
 // Directive defines a path and the processors to apply at that path.

@@ -46,7 +46,7 @@ var _ Realizer = (*StdRealizer)(nil)
 type StdRealizer struct{}
 
 // Realizer calculate rule
-func (r *StdRealizer) Realize(rc *RuleContext, rule []byte, procs ...Processor) ([]byte, error) {
+func (r *StdRealizer) Realize(rc *RealizeContext, rule []byte, procs ...Processor) ([]byte, error) {
 	var err error
 	for _, proc := range procs {
 		if proc == nil {

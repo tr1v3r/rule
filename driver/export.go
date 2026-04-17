@@ -28,7 +28,7 @@ type PathParser interface {
 // Realizer realize rule
 type Realizer interface {
 	// Realize realize rule
-	Realize(rc *RuleContext, rule []byte, ops ...Processor) ([]byte, error)
+	Realize(rc *RealizeContext, rule []byte, ops ...Processor) ([]byte, error)
 }
 
 // Modem Processors modem
@@ -48,7 +48,7 @@ type Processor interface {
 	// Type return processor type
 	Type() string
 	// Process do process rule
-	Process(rc *RuleContext, before []byte) (after []byte, err error)
+	Process(rc *RealizeContext, before []byte) (after []byte, err error)
 
 	// informatin
 	Author() string
@@ -60,8 +60,8 @@ type Processor interface {
 	Save() []byte
 }
 
-// RuleContext carries runtime information for dynamic rule construction.
-type RuleContext struct {
+// RealizeContext carries runtime information for dynamic rule construction.
+type RealizeContext struct {
 	context.Context
 	// TreePath is the path of the current tree node being processed.
 	TreePath string

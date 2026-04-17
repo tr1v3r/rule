@@ -142,7 +142,7 @@ func newTree[R Directive](diver driver.Driver, name, template string) *tree {
 	return &tree{
 		name: name,
 
-		defaultCtx: &driver.RuleContext{Context: context.Background()},
+		defaultCtx: &driver.RealizeContext{Context: context.Background()},
 
 		content:  []byte(template),
 		driver:   diver,

@@ -32,7 +32,7 @@ func GetRule(c *gin.Context) {
 	name := c.Query("name")
 	path := c.Query("path")
 
-	rc := driver.RuleContext{Context: c.Request.Context(), Params: make(map[string]string)}
+	rc := driver.RealizeContext{Context: c.Request.Context(), Params: make(map[string]string)}
 	for key, values := range c.Request.URL.Query() {
 		if len(values) > 0 && key != "name" && key != "path" {
 			rc.Params[key] = values[0]
