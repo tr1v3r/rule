@@ -355,16 +355,16 @@ func TestTree_Fallback(t *testing.T) {
 	}
 	t.Logf("fallback result: %s", s)
 
-	// Query existing root path — should also trigger fallback (no child for root level)
+	// Query existing root path — should NOT trigger fallback (target found at leaf)
 	fallbackCalled = false
 	result2, err := tree.Get("/")
 	if err != nil {
 		t.Fatalf("get root fail: %s", err)
 	}
-	if !fallbackCalled {
-		t.Error("expected fallback to be called for root query")
+	if fallbackCalled {
+		t.Error("fallback should not be called for existing root path")
 	}
-	t.Logf("root fallback result: %s", string(result2))
+	t.Logf("root result (no fallback): %s", string(result2))
 }
 
 func TestTree_FallbackWithContext(t *testing.T) {
